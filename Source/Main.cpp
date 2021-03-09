@@ -5,6 +5,14 @@
 #include "Lexer.h"
 #include "Parser.h"
 
+/** 
+ * This tool parses an Unreal Engine 4 header file
+ * for specifiers and outputs specifiers and their respective
+ * occurrence counts.
+ * 
+ * @param 1 - Filepath of file to be parsed.
+ * @param 2 - (Optional) Filepath of file to output results to. 
+ */
 int main(int ArgumentCount, char* Arguments[])
 {
 	if ( ArgumentCount < 2 )
