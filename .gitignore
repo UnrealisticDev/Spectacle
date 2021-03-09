@@ -341,3 +341,4 @@ healthchecksdb
 
 # Test files
 Test/
+*.json
