@@ -94,7 +94,7 @@ bool FParser::IsUnrealMacroToken(const FToken& Token)
 {
 	if (Token.Type == ETokenType::Identifier)
 	{
-		static TArray<FString> Macros =
+		static FString Macros[8] =
 		{
 			"UCLASS",
 			"USTRUCT",
