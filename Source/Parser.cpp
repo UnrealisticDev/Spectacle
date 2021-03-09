@@ -68,7 +68,7 @@ bool FParser::MatchPunctuator(const FString& Query)
 	FToken Token = GetToken();
 	if (Token.IsValid())
 	{
-		if (Token.Type == ETokenType::Punctuator && Token.Value == Query)
+		if (Token.Type == ETokenType::Punctuator && Token.Matches(Query))
 		{
 			return true;
 		}
@@ -172,7 +172,7 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 		}
 
 		// Metadata
-		if ( Specifier.Matches("meta") ) // account for casing
+		if ( Specifier.Matches("meta", false) )
 		{
 			RequirePunctuator("=");
 			RequirePunctuator("(");

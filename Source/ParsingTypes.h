@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreTypes.h"
+#include <algorithm>
 
 /** 
  * Type of token.
@@ -54,7 +55,22 @@ struct FToken
 	/** Compares a token to a string. */
 	bool Matches(const FString Query, bool bCaseSensitive = true) const
 	{
-		return Value == Query;
+		if (bCaseSensitive)
+		{
+			return Value == Query;
+		}
+
+		else
+		{
+			return std::equal
+			(
+				Value.begin(), Value.end(),
+				Query.begin(), Query.end(),
+				[](char a, char b) -> bool
+			{
+				return tolower(a) == tolower(b);
+			});
+		}
 	}
 
 	/** Clears the contents of the token. */
