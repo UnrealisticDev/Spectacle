@@ -4,7 +4,7 @@
 #include "Lexer.h"
 #include "Parser.h"
 
-int main()
+int main(int ArgumentCount, char* Arguments[])
 {
 	FString Filename = "Test.txt";
 	FString FileContents = "";
