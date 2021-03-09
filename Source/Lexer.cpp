@@ -31,7 +31,7 @@ bool FChar::IsAlphanumeric(char Char)
 
 bool FChar::IsPunctuator(char Char)
 {
-	char PunctuatorList[28] = 
+	static char PunctuatorList[28] = 
 	{
 		'!', '%', '^', '&', '*', '(', ')', 
 		'-','+', '=', '{', '}', '|', '~',
@@ -39,7 +39,7 @@ bool FChar::IsPunctuator(char Char)
 		'<', '>', '?', ',', '.', '/', '#'
 	};
 
-	for (char c : PunctuatorList)
+	for (const char& c : PunctuatorList)
 	{
 		if (c == Char)
 		{
