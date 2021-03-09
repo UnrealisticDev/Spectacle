@@ -10,9 +10,8 @@ enum class ETokenType : uint8
 	None,			// Not a token.
 	Comment,		// Comment.
 	Identifier,		// An alphanumeric identifier.
-	Punctuator,		// A symbol.
-	Literal,		// A constant literal.
-	Max
+	Punctuator,		// A punctuation mark.
+	Literal			// A constant literal.
 };
 
 inline FString ToString(const ETokenType& TokenType)
@@ -34,14 +33,10 @@ inline FString ToString(const ETokenType& TokenType)
 	case ETokenType::Literal:
 		return "Literal";
 		break;
-	case ETokenType::Max:
-		return "Max";
-		break;
 	default:
+		return "Error";
 		break;
 	}
-
-	return "";
 }
 
 /** 
@@ -57,7 +52,7 @@ struct FToken
 	FString Value;
 
 	/** Compares a token to a string. */
-	bool Matches(const FString Query) const
+	bool Matches(const FString Query, bool bCaseSensitive = true) const
 	{
 		return Value == Query;
 	}
@@ -68,14 +63,21 @@ struct FToken
 		Type = ETokenType::None;
 		Value.clear();
 	}
+
+	/** Returns true so long as the token has been set. */
+	bool IsValid() const
+	{
+		return Type != ETokenType::None;
+	}
 };
 
 /** 
- * Listing of the types of
+ * Enumeration of the types of
  * Unreal Engine 4 specifiers.
  */
 enum class EUnrealSpecifierType
 {
+	None,
 	Class,
 	Enum,
 	EnumMeta,
@@ -86,9 +88,9 @@ enum class EUnrealSpecifierType
 	Max
 };
 
-inline FString ToString(EUnrealSpecifierType E)
+inline FString ToString(const EUnrealSpecifierType& SpecifierType)
 {
-	switch (E)
+	switch (SpecifierType)
 	{
 	case EUnrealSpecifierType::Class:
 		return "Class";
@@ -118,4 +120,48 @@ inline FString ToString(EUnrealSpecifierType E)
 		return "Error";
 		break;
 	}
+}
+
+/** 
+ * An Unreal Engine 4 specifier with a key/name
+ * and optional value(s).
+ */
+struct FUnrealSpecifier
+{
+	EUnrealSpecifierType Type;
+	bool bMetadata;
+	FString Key;
+	TArray<FString> Values;
+
+	FUnrealSpecifier()
+		: Type(EUnrealSpecifierType::None)
+		, bMetadata(false)
+	{}
+
+	FUnrealSpecifier(EUnrealSpecifierType InType, bool bInMetadata, FString InKey)
+		: Type(InType)
+		, bMetadata(bInMetadata)
+		, Key(InKey)
+	{}
+
+	bool operator==(const FUnrealSpecifier& Other) const
+	{
+		return Type == Other.Type
+			&& bMetadata == Other.bMetadata
+			&& Key == Other.Key;
+	}
+};
+
+namespace std
+{
+	template<>
+	struct hash<FUnrealSpecifier>
+	{
+		std::size_t operator()(const FUnrealSpecifier& Specifier) const
+		{
+			return hash<int>()((int)Specifier.Type)
+				* hash<FString>()(Specifier.Key)
+				* hash<bool>()(Specifier.bMetadata);
+		}
+	};
 }

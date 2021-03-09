@@ -1,25 +1,27 @@
+#include <iostream>
 #include <fstream>
 #include "CoreTypes.h"
 #include "Lexer.h"
 #include "Parser.h"
 
-// Currently just for testing
 int main()
 {
+	FString Filename = "Test.txt";
 	FString FileContents = "";
 
-	std::ifstream File("Test.txt");
+	std::ifstream File(Filename);
 	if (File.is_open())
 	{
 		FString Line = "";
 		while (!File.eof())
 		{
 			std::getline(File, Line);
-			FileContents += Line + "\n\r";
+			FileContents += Line + "\n\r"; // Normalize line endings
 		}
 	}
 
 	FLexer Lexer;
-	TArray<FToken> Tokens = Lexer.Tokenize(FileContents.c_str());
-	FLexer::Dump(Tokens);
+	FParser Parser;
+
+	Parser.IdentifyUnrealSpecifiers(Lexer.Tokenize(FileContents.c_str()));
 }

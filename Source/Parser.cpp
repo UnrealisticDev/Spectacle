@@ -1,221 +1,240 @@
 #include "Parser.h"
 #include <iostream>
+#include "assert.h"
+#include "ios"
+#include "iomanip"
 
 FParser::FParser()
 {
-	// noop
+	CursorPos = 0;
+	PreviousPos = 0;
 }
 
-void FParser::FindSpecifiers(TArray<FToken> InTokens)
+FSpecifierCountMap FParser::IdentifyUnrealSpecifiers(TArray<FToken> InTokens)
 {
 	Tokens = InTokens;
 
-	using FSpecCountMapByType = std::map<EUnrealSpecifierType, std::map<FString, int32>>;
-	FSpecCountMapByType SpecCountMapByType;
+	FSpecifierCountMap SpecifierCountMap;
 
-	for ( int32 Index = 0; Index < (int32)Tokens.size(); )
+	FToken MacroToken;
+	while ( PeekToken().IsValid() )
 	{
-		FToken Token = Tokens[Index];
-
-		if (Token.Matches("UCLASS"))
+		MacroToken = GetUnrealMacroToken();
+		if ( MacroToken.IsValid() )
 		{
-			std::cout << "Found a UCLASS spec.\n";
 			IdentifySpecifiersWithinMacro
 			(
-				Index, 
-				SpecCountMapByType[EUnrealSpecifierType::Class]
+				DeriveUnrealSpecifierType(MacroToken), 
+				SpecifierCountMap
 			);
 		}
+	}
 
-		else if (Token.Matches("USTRUCT"))
-		{
-			std::cout << "Found a USTRUCT spec.\n";
-			IdentifySpecifiersWithinMacro
-			(
-				Index,
-				SpecCountMapByType[EUnrealSpecifierType::Struct]
-			);
-		}
+	return SpecifierCountMap;
+}
 
-		else if (Token.Matches("UPROPERTY"))
-		{
-			std::cout << "Found a UPROPERTY spec.\n";
-			IdentifySpecifiersWithinMacro
-			(
-				Index,
-				SpecCountMapByType[EUnrealSpecifierType::Property]
-			);
-		}
+void FParser::Dump(const FSpecifierCountMap& SpecifierCountMap)
+{
+	for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
+	{
+		std::cout << std::left << std::setfill(' ')
+			<< std::setw(16) << "(" + ToString(SpecifierCount.first.Type) + ")"
+			<< std::setw(8) << (SpecifierCount.first.bMetadata ? "meta" : " ")
+			<< std::setw(40) << SpecifierCount.first.Key
+			<< " --> " 
+			<< std::setw(8) << SpecifierCount.second 
+			<< std::endl;
+	}
+}
 
-		else if (Token.Matches("UFUNCTION"))
-		{
-			std::cout << "Found a UFUNCTION spec.\n";
-			IdentifySpecifiersWithinMacro
-			(
-				Index,
-				SpecCountMapByType[EUnrealSpecifierType::Function]
-			);
-		}
+FToken FParser::GetToken()
+{
+	PreviousPos = CursorPos;
+	return (size_t)CursorPos < Tokens.size() ? Tokens[CursorPos++] : FToken();
+}
 
-		else if (Token.Matches("UENUM"))
-		{
-			std::cout << "Found a UENUM spec.\n";
-			IdentifySpecifiersWithinMacro
-			(
-				Index,
-				SpecCountMapByType[EUnrealSpecifierType::Enum]
-			);
-		}
+FToken FParser::PeekToken()
+{
+	return (size_t)CursorPos < Tokens.size() ? Tokens[CursorPos] : FToken();
+}
 
-		else if (Token.Matches("UMETA"))
-		{
-			std::cout << "Found a UMETA spec.\n";
-			IdentifySpecifiersWithinMacro
-			(
-				Index,
-				SpecCountMapByType[EUnrealSpecifierType::EnumMeta]
-			);
-		}
+void FParser::UngetToken()
+{
+	CursorPos = PreviousPos;
+}
 
-		else if (Token.Matches("UINTERFACE"))
+bool FParser::MatchPunctuator(const FString& Query)
+{
+	FToken Token = GetToken();
+	if (Token.IsValid())
+	{
+		if (Token.Type == ETokenType::Punctuator && Token.Value == Query)
 		{
-			std::cout << "Found a UINTERFACE spec.\n";
-			IdentifySpecifiersWithinMacro
-			(
-				Index,
-				SpecCountMapByType[EUnrealSpecifierType::Interface]
-			);
+			return true;
 		}
 
 		else
 		{
-			++Index;
+			UngetToken();
 		}
 	}
 
-	for (auto Map : SpecCountMapByType)
+	return false;
+}
+
+void FParser::RequirePunctuator(const FString& Query)
+{
+	if ( !MatchPunctuator(Query) )
 	{
-		std::printf("Spec type: %s\n", ToString(Map.first).c_str());
-		for (auto Pair : Map.second)
-		{
-			std::printf("\tSpecifier: %s, Count: %d\n", Pair.first.c_str(), Pair.second);
-		}
+		throw;
 	}
 }
 
-void FParser::IdentifySpecifiersWithinMacro(int32& Index, std::map<FString, int32>& SpecCountMap)
+bool FParser::IsUnrealMacroToken(const FToken& Token)
 {
-	bool bRequireComma = false;
-
-	// Step up to opening paren
-	FToken Token;
-	do
+	if (Token.Type == ETokenType::Identifier)
 	{
-		Token = Tokens[++Index];
+		static TArray<FString> Macros =
+		{
+			"UCLASS",
+			"USTRUCT",
+			"UPROPERTY",
+			"UFUNCTION",
+			"UENUM",
+			"UMETA",
+			"UINTERFACE"
+		};
 
-	} while ( !Token.Matches("(") );
+		for (const FString& Macro : Macros)
+		{
+			if (Token.Value == Macro)
+			{
+				return true;
+			}
+		}
+	}
 
-	// Parse next tokens, until you hit closing paren
+	return false;
+}
+
+FToken FParser::GetUnrealMacroToken()
+{
+	FToken Token;
 	do 
 	{
-		Token = Tokens[++Index];
-
-		// If token is meta, move into subroutine
-		if (Token.Matches("meta"))
+		Token = GetToken();
+		if ( IsUnrealMacroToken(Token) )
 		{
-			// Introductory symbols =(
-			do 
-			{
-				Token = Tokens[++Index];
-
-			} while ( !Token.Matches("=") );
-
-			do
-			{
-				Token = Tokens[++Index];
-
-			} while ( !Token.Matches("(") );
-
-			// 
-			do 
-			{
-				Token = Tokens[++Index];
-
-				if (Token.Type == ETokenType::Identifier)
-				{
-					// Add to count map
-					std::cout << "\tKeyword: " << Token.Value << "\n";
-					if (SpecCountMap.find(CapitalizeSpecifier(Token.Value)) != SpecCountMap.end())
-					{
-						SpecCountMap[CapitalizeSpecifier(Token.Value)] += 1;
-					}
-					
-					else
-					{
-						SpecCountMap.emplace(CapitalizeSpecifier(Token.Value), 1);
-					}
-
-					// Check next
-					Token = Tokens[++Index];
-
-					// If comma, lets loop again
-					if (Token.Matches(","))
-					{
-						continue;
-					}
-
-					// If equal symbol...
-					else if (Token.Matches("="))
-					{
-						// Get next, which should be value
-						Token = Tokens[++Index];
-						// Do nothing with value for the time being
-					}
-				}
-
-			} while ( !Token.Matches(")") );
+			break;
 		}
 
-		else if (Token.Type == ETokenType::Identifier)
+	} while ( Token.IsValid() );
+
+	return Token;
+}
+
+EUnrealSpecifierType FParser::DeriveUnrealSpecifierType(FToken& MacroToken)
+{
+	assert(MacroToken.IsValid());
+
+	static std::unordered_map<FString, EUnrealSpecifierType> Macros =
+	{
+		{"UCLASS", EUnrealSpecifierType::Class},
+		{"USTRUCT",	EUnrealSpecifierType::Struct},
+		{"UPROPERTY", EUnrealSpecifierType::Property},
+		{"UFUNCTION", EUnrealSpecifierType::Function},
+		{"UENUM", EUnrealSpecifierType::Enum},
+		{"UMETA", EUnrealSpecifierType::EnumMeta},
+		{"UINTERFACE", EUnrealSpecifierType::Interface}
+	};
+
+	return Macros.find(MacroToken.Value)->second;
+}
+
+void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, FSpecifierCountMap& SpecifierCountMap)
+{
+	RequirePunctuator("(");
+
+	int32 SpecifierCount = 0;
+
+	while ( !MatchPunctuator(")") )
+	{
+		if (SpecifierCount > 0)
 		{
-			// Add to list
-			std::cout << "\tKeyword: " << Token.Value << "\n";
-			if (SpecCountMap.find(CapitalizeSpecifier(Token.Value)) != SpecCountMap.end())
+			RequirePunctuator(",");
+		}
+		++SpecifierCount;
+
+		FToken Specifier = GetToken();
+		if ( !Specifier.IsValid() )
+		{
+			throw;
+		}
+
+		// Metadata
+		if ( Specifier.Matches("meta") ) // account for casing
+		{
+			RequirePunctuator("=");
+			RequirePunctuator("(");
+
+			while ( !MatchPunctuator(")") )
 			{
-				SpecCountMap[CapitalizeSpecifier(Token.Value)] += 1;
+				Specifier = GetToken();
+				FUnrealSpecifier USpecifier(SpecifierType, true, Specifier.Value);
+				if (SpecifierCountMap.find(USpecifier) != SpecifierCountMap.end())
+				{
+					SpecifierCountMap[USpecifier] += 1;
+				}
+
+				else
+				{
+					SpecifierCountMap[USpecifier] = 1;
+				}
+
+				if ( !MatchPunctuator(",") )
+				{
+					if (MatchPunctuator("="))
+					{
+						GetToken(); // Value
+					}
+				}
+			}
+		}
+
+		// Top-level specifier
+		else
+		{
+			FUnrealSpecifier USpecifier(SpecifierType, false, Specifier.Value);
+			if ( SpecifierCountMap.find(USpecifier) != SpecifierCountMap.end() )
+			{
+				SpecifierCountMap[USpecifier] += 1;
 			}
 
 			else
 			{
-				SpecCountMap.emplace(CapitalizeSpecifier(Token.Value), 1);
+				SpecifierCountMap[USpecifier] = 1;
 			}
 
-			// Check next
-			Token = Tokens[++Index];
-
-			// If comma, lets loop again
-			if (Token.Matches(","))
+			if ( MatchPunctuator("=") )
 			{
-				continue;
+				if ( MatchPunctuator("(") )
+				{
+					while ( !MatchPunctuator(")") )
+					{
+						GetToken(); // Value(s)
+					}
+				}
+
+				else
+				{
+					GetToken(); // Value
+				}
 			}
 
-			// If equal symbol...
-			else if (Token.Matches("="))
+			else
 			{
-				// Get next, which should be value
-				Token = Tokens[++Index];
-				// Do nothing with value for the time being
+				// no op
 			}
 		}
-
-	} while ( !Token.Matches(")") );
-
-	// Step to next token
-	++Index;
-}
-
-FString FParser::CapitalizeSpecifier(FString Specifier)
-{
-	Specifier[0] = toupper(Specifier[0]);
-	return Specifier;
+	}
 }
