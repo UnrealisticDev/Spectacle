@@ -104,7 +104,7 @@ void FLexer::Dump(TArray<FToken> Tokens)
 void FLexer::Reset(const char* InSource)
 {
 	Source = InSource;
-	SourceLength = strlen(Source);
+	SourceLength = (int32)strlen(Source);
 	CursorPos = 0;
 	PreviousPos = 0;
 }
