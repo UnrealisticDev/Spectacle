@@ -1,8 +1,9 @@
 #include "Parser.h"
 #include <iostream>
+#include <ios>
+#include <iomanip>
+#include <fstream>
 #include "assert.h"
-#include "ios"
-#include "iomanip"
 
 FParser::FParser()
 {
@@ -44,6 +45,37 @@ void FParser::Dump(const FSpecifierCountMap& SpecifierCountMap)
 			<< " --> " 
 			<< std::setw(8) << SpecifierCount.second 
 			<< std::endl;
+	}
+}
+
+void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString& Filepath)
+{
+	std::ofstream File;
+	File.open(Filepath);
+	if (File.is_open())
+	{
+		auto Quotes = [](const FString& Format) -> FString
+		{
+			return '"' + Format + '"';
+		};
+
+		File << "{";
+		File << Quotes("data") << ":";
+		File << "[";
+
+		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
+		{
+			File << "{";
+			File << Quotes("type") << ":" << Quotes(ToString(SpecifierCount.first.Type)) << ",";
+			File << Quotes("meta") << ":" << SpecifierCount.first.bMetadata << ",";
+			File << Quotes("key") << ":" << Quotes(SpecifierCount.first.Key) << ",";
+			File << Quotes("count") << ":" << SpecifierCount.second;
+			File << "}";
+			File << ",";
+		}
+
+		File << "]";
+		File << "}";
 	}
 }
 

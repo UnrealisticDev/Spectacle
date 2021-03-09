@@ -36,5 +36,7 @@ int main(int ArgumentCount, char* Arguments[])
 	FLexer Lexer;
 	FParser Parser;
 
-	FParser::Dump(Parser.IdentifyUnrealSpecifiers(Lexer.Tokenize(FileContent.c_str())));
+	FSpecifierCountMap SpecifierCountMap = Parser.IdentifyUnrealSpecifiers(Lexer.Tokenize(FileContent.c_str()));
+	FParser::Dump(SpecifierCountMap);
+	FParser::ToJSON(SpecifierCountMap, Arguments[2] ? Arguments[2] : ".shared/Output.json");
 }

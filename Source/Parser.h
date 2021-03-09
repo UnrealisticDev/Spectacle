@@ -26,6 +26,9 @@ public:
 	/** Print debug info for an a map of specifier counts. */
 	static void Dump(const FSpecifierCountMap& SpecifierCountMap);
 
+	/** Output map of specifier counts to JSON. */
+	static void ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString& Filepath);
+
 private:
 
 	/** Gets the next token in the stream. */
