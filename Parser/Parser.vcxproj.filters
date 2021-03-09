@@ -36,8 +36,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Test.txt">
+    <Text Include="Test\Test.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Out\Output.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
