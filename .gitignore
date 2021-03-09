@@ -342,4 +342,9 @@ healthchecksdb
 # Test files
 Test/
 *.json
+
+# libgit2 dependency
 /Garganta/git2.dll
+
+# Temp clone directory
+/Garganta/Temp
