@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-// STL types
+// Common types
 using uint8 = uint8_t;
 using int32 = int32_t;
 using FString = std::string;
