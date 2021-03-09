@@ -39,9 +39,9 @@ bool FChar::IsPunctuator(char Char)
 		'<', '>', '?', ',', '.', '/', '#'
 	};
 
-	for (const char& c : PunctuatorList)
+	for (const char& Punctuation : PunctuatorList)
 	{
-		if (c == Char)
+		if (Char == Punctuation)
 		{
 			return true;
 		}
