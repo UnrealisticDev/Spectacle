@@ -9,8 +9,6 @@ struct FGitOps
 	/** Clones the requested repository into a working directory. */
 	static bool CloneDirectory(const char* RepoURL, const char* WorkingDirectory)
 	{
-		git_libgit2_init();
-
 		namespace fs = std::filesystem;
 		if (fs::exists(WorkingDirectory) && fs::is_directory(WorkingDirectory))
 		{
@@ -24,6 +22,8 @@ struct FGitOps
 				return false;
 			}
 		}
+
+		git_libgit2_init();
 
 		git_repository* repo = nullptr;
 		if ( git_clone(&repo, RepoURL, WorkingDirectory, nullptr) != 0 )
