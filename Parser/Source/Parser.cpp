@@ -78,7 +78,7 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 
 			File << "{";
 			File << Quotes("type") << ":" << Quotes(ToString(SpecifierCount.first.Type)) << ",";
-			File << Quotes("meta") << ":" << SpecifierCount.first.bMetadata << ",";
+			File << Quotes("meta") << ":" << (SpecifierCount.first.bMetadata ? "true" : "false") << ",";
 			File << Quotes("key") << ":" << Quotes(SpecifierCount.first.Key) << ",";
 			File << Quotes("count") << ":" << SpecifierCount.second;
 			File << "}";
