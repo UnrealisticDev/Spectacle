@@ -31,5 +31,8 @@
     <ClInclude Include="Source\Repository.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\CoreTypes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
