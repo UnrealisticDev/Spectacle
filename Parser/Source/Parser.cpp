@@ -209,8 +209,15 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 			RequirePunctuator("=");
 			RequirePunctuator("(");
 
+			int32 MetaSpecifierCount = 0;
 			while ( !MatchPunctuator(")") )
 			{
+				if ( MetaSpecifierCount > 0 )
+				{
+					RequirePunctuator(",");
+				}
+				++MetaSpecifierCount;
+
 				Specifier = GetToken();
 				FUnrealSpecifier USpecifier(SpecifierType, true, Specifier.Value);
 				if (SpecifierCountMap.find(USpecifier) != SpecifierCountMap.end())
@@ -223,12 +230,9 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 					SpecifierCountMap[USpecifier] = 1;
 				}
 
-				if ( !MatchPunctuator(",") )
+				if ( MatchPunctuator("=") )
 				{
-					if (MatchPunctuator("="))
-					{
-						GetToken(); // Value
-					}
+					GetToken(); // Value
 				}
 			}
 		}
