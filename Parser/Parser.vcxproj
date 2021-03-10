@@ -146,6 +146,7 @@
     <ClCompile Include="Source\Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Garganta\Source\json.hpp" />
     <ClInclude Include="Source\Lexer.h" />
     <ClInclude Include="Source\Parser.h" />
     <ClInclude Include="Source\CoreTypes.h" />

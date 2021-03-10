@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <fstream>
 #include "assert.h"
+#include "json.hpp"
 
 FParser::FParser()
 {
@@ -59,33 +60,25 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 			return '"' + Format + '"';
 		};
 
-		File << "{";
-		File << Quotes("data") << ":";
-		File << "[";
+		using json = nlohmann::json;
+		json Result;
+		{
+			Result["data"] = {};
+		}
 
 		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
 		{
-			static bool bComma = false;
-			if (bComma)
+			json Spec;
 			{
-				File << ",";
+				Spec["type"] = ToString(SpecifierCount.first.Type);
+				Spec["key"] = SpecifierCount.first.Key;
+				Spec["meta"] = SpecifierCount.first.bMetadata;
+				Spec["count"] = SpecifierCount.second;
 			}
-
-			else
-			{
-				bComma = true;
-			}
-
-			File << "{";
-			File << Quotes("type") << ":" << Quotes(ToString(SpecifierCount.first.Type)) << ",";
-			File << Quotes("meta") << ":" << (SpecifierCount.first.bMetadata ? "true" : "false") << ",";
-			File << Quotes("key") << ":" << Quotes(SpecifierCount.first.Key) << ",";
-			File << Quotes("count") << ":" << SpecifierCount.second;
-			File << "}";
+			Result["data"] += Spec;
 		}
-
-		File << "]";
-		File << "}";
+		
+		File << Result.dump();
 	}
 }
 
