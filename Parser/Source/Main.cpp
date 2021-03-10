@@ -12,6 +12,7 @@
  * 
  * @param 1 - Filepath of file to be parsed.
  * @param 2 - (Optional) Filepath of file to output results to. 
+ * @param 3 - (Optional) -debug = Prints output to console.
  */
 int main(int ArgumentCount, char* Arguments[])
 {
@@ -45,6 +46,10 @@ int main(int ArgumentCount, char* Arguments[])
 	FParser Parser;
 
 	FSpecifierCountMap SpecifierCountMap = Parser.IdentifyUnrealSpecifiers(Lexer.Tokenize(FileContent.c_str()));
-	FParser::Dump(SpecifierCountMap);
 	FParser::ToJSON(SpecifierCountMap, Arguments[2] ? Arguments[2] : "Out/Output.json");
+
+	if ( ArgumentCount > 3 && Arguments[3] == "-debug" )
+	{
+		FParser::Dump(SpecifierCountMap);
+	}
 }
