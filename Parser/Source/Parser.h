@@ -2,9 +2,6 @@
 
 #include "CoreTypes.h"
 #include "ParsingTypes.h"
-#include "unordered_map"
-
-using FSpecifierCountMap = std::unordered_map<FUnrealSpecifier, int32>;
 
 /** 
  * A custom parser that identifies

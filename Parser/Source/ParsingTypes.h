@@ -2,6 +2,7 @@
 
 #include "CoreTypes.h"
 #include <algorithm>
+#include <unordered_map>
 
 /** 
  * Type of token.
@@ -184,3 +185,5 @@ namespace std
 		}
 	};
 }
+
+using FSpecifierCountMap = std::unordered_map<FUnrealSpecifier, int32>;
