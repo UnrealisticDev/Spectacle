@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="Source\CollectionTypes.h" />
     <ClInclude Include="Source\CoreTypes.h" />
+    <ClInclude Include="Source\json.hpp" />
     <ClInclude Include="Source\Repository.h" />
     <ClInclude Include="Source\SpecifierCollector.h" />
   </ItemGroup>

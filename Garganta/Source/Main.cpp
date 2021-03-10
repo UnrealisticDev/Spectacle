@@ -8,12 +8,9 @@ int main()
 
 	FRepository::Clone(RepoURL, StagingDirectory);
 
-	FSpecifierCollection SpecifierCollection;
+	FSpecifierStats SpecifierStats;
 	FSpecifierCollector SpecifierCollector;
-	if ( !SpecifierCollector.GatherSpecifiers(StagingDirectory, SpecifierCollection) )
-	{
-		return -1;
-	}
+	SpecifierCollector.GatherSpecifiers(StagingDirectory, SpecifierStats);
 
 	FRepository::Cleanup(StagingDirectory);
 }

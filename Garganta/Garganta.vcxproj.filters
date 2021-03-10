@@ -34,5 +34,8 @@
     <ClInclude Include="Source\CoreTypes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\json.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

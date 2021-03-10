@@ -7,8 +7,11 @@ class FSpecifierCollector
 {
 public:
 
-	/** Gather specifiers and output them. */
-	bool GatherSpecifiers(const char* WorkingDirectory, FSpecifierCollection& OutCollection);
+	/** 
+	 * Gather specifiers found in the provided directory 
+	 * and output relevant stats. 
+	 */
+	bool GatherSpecifiers(const char* Directory, FSpecifierStats& OutStats);
 
 private:
 
