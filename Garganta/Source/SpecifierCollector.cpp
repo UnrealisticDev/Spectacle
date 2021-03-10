@@ -19,7 +19,11 @@ bool FSpecifierCollector::GatherSpecifiers(const char* WorkingDirectory, FSpecif
 		{
 			std::cout << Path.path() << std::endl;
 			
+			std::string S = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe ";
+			S += Path.path().string();
 			// Run parser on file (sync)
+			std::system(S.c_str());
+
 			// Read results from output file
 			// Append to OutCollection
 		}
