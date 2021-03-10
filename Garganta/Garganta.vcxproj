@@ -78,8 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\Projects\Unrealistic\Spectacle\ThirdParty\json\single_include\nlohmann;C:\Program Files (x86)\libgit2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\libgit2\lib;C:\Program Files (x86)\libgit2\bin\git2.dll;$(LibraryPath)</LibraryPath>
+    <IncludePath>F:\Projects\Unrealistic\Spectacle\ThirdParty\json\single_include\nlohmann;F:\Projects\Unrealistic\Spectacle\ThirdParty\libgit2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\Projects\Unrealistic\Spectacle\ThirdParty\libgit2\build\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
