@@ -11,6 +11,7 @@ int main()
 	FSpecifierStats SpecifierStats;
 	FSpecifierCollector SpecifierCollector;
 	SpecifierCollector.GatherSpecifiers(StagingDirectory, SpecifierStats);
+	FSpecifierCollector::Dump(SpecifierStats);
 
 	FRepository::Cleanup(StagingDirectory);
 }

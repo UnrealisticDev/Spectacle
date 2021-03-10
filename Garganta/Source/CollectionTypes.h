@@ -61,18 +61,18 @@ inline FString ToString(const EUnrealSpecifierType& SpecifierType)
  */
 struct FUnrealSpecifier
 {
-	EUnrealSpecifierType Type;
+	FString Type;
 	bool bMetadata;
 	FString Key;
 	TArray<FString> Values;
 
 	FUnrealSpecifier()
-		: Type(EUnrealSpecifierType::None)
+		: Type("")
 		, bMetadata(false)
 	{
 	}
 
-	FUnrealSpecifier(EUnrealSpecifierType InType, bool bInMetadata, FString InKey)
+	FUnrealSpecifier(FString InType, bool bInMetadata, FString InKey)
 		: Type(InType)
 		, bMetadata(bInMetadata)
 		, Key(InKey)
@@ -96,7 +96,7 @@ namespace std
 	{
 		std::size_t operator()(const FUnrealSpecifier& Specifier) const
 		{
-			return hash<int>()((int)Specifier.Type)
+			return hash<FString>()(Specifier.Type)
 				* hash<FString>()(Specifier.Key)
 				* hash<bool>()(Specifier.bMetadata);
 		}

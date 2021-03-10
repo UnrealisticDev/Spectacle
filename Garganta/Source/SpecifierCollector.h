@@ -13,6 +13,9 @@ public:
 	 */
 	bool GatherSpecifiers(const char* Directory, FSpecifierStats& OutStats);
 
+	/** Prints out debug information regarding specifier stats. */
+	static void Dump(const FSpecifierStats& Stats);
+
 private:
 
 	/** The root directory from which we begin parsing. */

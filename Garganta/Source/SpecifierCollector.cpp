@@ -21,8 +21,6 @@ bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStat
 	{
 		if ( !SourcePath.is_directory() && SourcePath.path().extension() == ".h" )
 		{
-			std::cout << SourcePath.path() << std::endl;
-			
 			// Run parse subprocess - results in output at Results.json
 			FString ParseCommand = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe";
 			ParseCommand += " " + SourcePath.path().string();
@@ -58,17 +56,48 @@ bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStat
 				for (const json& Result : Results["data"])
 				{
 					assert(Result.is_object());
-					std::cout << Result << "\n";
+
+					// Append to collection
+					FUnrealSpecifier Specifier
+					(
+						Result["type"].get<FString>(),
+						Result["meta"].get<bool>(),
+						Result["key"].get<FString>()
+					);
+					
+					OutStats[Specifier][SourcePath.path().string()] = Result["count"];
 				}
 			}
 			catch(std::exception& e)
 			{
 				std::cout << "Failed to parse result file: " << e.what() << "\n";
 			}
-
-			// Append to OutCollection
 		}
 	}
 
 	return true;
+}
+
+void FSpecifierCollector::Dump(const FSpecifierStats& Stats)
+{
+	for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
+	{
+		std::cout 
+			<< "(" + Stat.first.Type + ")" 
+			<< " " << Stat.first.Key 
+			<< " " << (Stat.first.bMetadata ? "meta" : "") 
+			<< std::endl;
+
+		for (const std::pair<const FString, int32>& File : Stat.second)
+		{
+			std::cout 
+				<< "\t" 
+				<< File.first 
+				<< " --> " 
+				<< File.second 
+				<< std::endl;
+		}
+
+		std::cout << std::endl;
+	}
 }
