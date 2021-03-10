@@ -65,13 +65,23 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 
 		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
 		{
+			static bool bComma = false;
+			if (bComma)
+			{
+				File << ",";
+			}
+
+			else
+			{
+				bComma = true;
+			}
+
 			File << "{";
 			File << Quotes("type") << ":" << Quotes(ToString(SpecifierCount.first.Type)) << ",";
 			File << Quotes("meta") << ":" << SpecifierCount.first.bMetadata << ",";
 			File << Quotes("key") << ":" << Quotes(SpecifierCount.first.Key) << ",";
 			File << Quotes("count") << ":" << SpecifierCount.second;
 			File << "}";
-			File << ",";
 		}
 
 		File << "]";
