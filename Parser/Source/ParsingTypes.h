@@ -158,7 +158,10 @@ struct FUnrealSpecifier
 		: Type(InType)
 		, bMetadata(bInMetadata)
 		, Key(InKey)
-	{}
+	{
+		std::transform(Key.begin(), Key.end(), Key.begin(),
+			[](unsigned char c) { return std::tolower(c); });
+	}
 
 	bool operator==(const FUnrealSpecifier& Other) const
 	{
