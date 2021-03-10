@@ -1,5 +1,9 @@
 #pragma once
 
+/** 
+ * Helper class to clone and cleanup 
+ * a repository that will be parsed.
+ */
 struct FRepository
 {
 	/** Clones the requested repository into the destination directory. */
