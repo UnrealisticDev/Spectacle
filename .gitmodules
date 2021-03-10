@@ -1,6 +1,6 @@
 [submodule "ThirdParty/json"]
-	path = ThirdParty/json
+	path = Dependencies/json
 	url = https://github.com/nlohmann/json.git
 [submodule "ThirdParty/libgit2"]
-	path = ThirdParty/libgit2
+	path = Dependencies/libgit2
 	url = https://github.com/libgit2/libgit2.git
