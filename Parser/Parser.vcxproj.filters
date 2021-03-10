@@ -28,9 +28,6 @@
     <ClInclude Include="Source\ParsingTypes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\CoreTypes.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Parser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
