@@ -1,6 +1,8 @@
 #pragma once
 
 #include "git2.h"
+#include <iostream>
+#include <filesystem>
 
 struct FGitOps
 {
@@ -8,6 +10,20 @@ struct FGitOps
 	static bool CloneDirectory(const char* RepoURL, const char* WorkingDirectory)
 	{
 		git_libgit2_init();
+
+		namespace fs = std::filesystem;
+		if (fs::exists(WorkingDirectory) && fs::is_directory(WorkingDirectory))
+		{
+			try
+			{
+				fs::remove_all(WorkingDirectory);
+			}
+			catch (std::filesystem::filesystem_error E)
+			{
+				std::cerr << "Failed to clear working directory: " << E.what();
+				return false;
+			}
+		}
 
 		git_repository* repo = nullptr;
 		if ( git_clone(&repo, RepoURL, WorkingDirectory, nullptr) != 0 )
