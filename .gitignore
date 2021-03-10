@@ -342,3 +342,4 @@ healthchecksdb
 # Test files
 Test/
 *.json
+/Garganta/git2.dll
