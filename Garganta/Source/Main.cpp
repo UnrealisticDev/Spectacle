@@ -1,39 +1,19 @@
-#include <iostream>
-#include <filesystem>
-#include "GitOps.h"
-
-bool CleanupWorkingDirectory()
-{
-	try
-	{
-		std::filesystem::remove_all("Temp");
-	}
-	catch (std::filesystem::filesystem_error E)
-	{
-		std::cerr << "Working directory cleanup failed: " << E.what();
-		return false;
-	}
-
-	return true;
-}
+#include "Repository.h"
+#include "SpecifierCollector.h"
 
 int main()
 {
-	const std::string WorkingDirectory = "Temp";
-	if ( !FGitOps::CloneDirectory("https://github.com/Mowgl33/Rebaser.git", WorkingDirectory.c_str()) )
+	const char* RepoURL = "https://github.com/EverNewJoy/VictoryPlugin.git";
+	const char* StagingDirectory = "Temp";
+
+	FRepository::Clone(RepoURL, StagingDirectory);
+
+	FSpecifierCollection SpecifierCollection;
+	FSpecifierCollector SpecifierCollector;
+	if ( !SpecifierCollector.GatherSpecifiers(StagingDirectory, SpecifierCollection) )
 	{
 		return -1;
 	}
 
-	// Step through files and compile list of specifier counts/file
-
-	
-	// @TODO: Post data to relevant server (Contentful most likely)]
-	
-	if ( !CleanupWorkingDirectory() )
-	{
-		return -1;
-	}
-
-	return 0;
+	FRepository::Cleanup(StagingDirectory);
 }

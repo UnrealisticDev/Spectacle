@@ -144,9 +144,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Main.cpp" />
+    <ClCompile Include="Source\Repository.cpp" />
+    <ClCompile Include="Source\SpecifierCollector.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\GitOps.h" />
+    <ClInclude Include="Source\CollectionTypes.h" />
+    <ClInclude Include="Source\Repository.h" />
+    <ClInclude Include="Source\SpecifierCollector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
