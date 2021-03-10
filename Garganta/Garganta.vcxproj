@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files (x86)\libgit2\include;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Projects\Unrealistic\Spectacle\ThirdParty\json\single_include\nlohmann;C:\Program Files (x86)\libgit2\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files (x86)\libgit2\lib;C:\Program Files (x86)\libgit2\bin\git2.dll;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -150,7 +150,6 @@
   <ItemGroup>
     <ClInclude Include="Source\CollectionTypes.h" />
     <ClInclude Include="Source\CoreTypes.h" />
-    <ClInclude Include="Source\json.hpp" />
     <ClInclude Include="Source\Repository.h" />
     <ClInclude Include="Source\SpecifierCollector.h" />
   </ItemGroup>

@@ -34,9 +34,6 @@
     <ClInclude Include="Source\Parser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Garganta\Source\json.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test\Test.txt">
