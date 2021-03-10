@@ -1,8 +1,6 @@
 #include "Lexer.h"
-#include "iostream"
-#include "iomanip"
-#include "ios"
-#include "ostream"
+#include <iostream>
+#include <iomanip>
 
 bool FChar::IsNewline(char Char)
 {
