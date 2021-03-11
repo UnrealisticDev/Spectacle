@@ -1,9 +1,9 @@
 #include "SpecifierCollector.h"
 #include <filesystem>
 #include <iostream>
+#include <fstream>
 #include "CoreTypes.h"
 #include "json.hpp"
-#include <fstream>
 
 void FSpecifierCollector::ParseSpecifiers(const char* Directory)
 {
@@ -78,7 +78,47 @@ void FSpecifierCollector::ParseSpecifiers(const char* Directory)
 
 void FSpecifierCollector::Upload()
 {
-	// no op
+	const FString DatabasePath = "Database.json";
+	std::ofstream Database(DatabasePath);
+	if ( !Database.is_open())
+	{
+		std::cerr << "Failed to open/create Database.json";
+	}
+
+	using json = nlohmann::json;
+	json Data;
+	{
+		Data["data"] = {};
+		for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
+		{
+			json jStat;
+			jStat["type"] = Stat.first.Type;
+			jStat["meta"] = Stat.first.bMetadata;
+			jStat["key"] = Stat.first.Key;
+
+			jStat["appearances"] = {};
+			for (const std::pair<const FString, int32>& Appearance : Stat.second)
+			{
+				json App;
+				App["file"] = Appearance.first;
+				App["count"] = Appearance.second;
+
+				jStat["appearances"] += App;
+			}
+
+			Data["data"] += jStat;
+		}
+	}
+
+	Database << Data;
+	Database.close();
+
+	std::system
+	(
+		"node"
+		" F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js"
+		" Database.json"
+	);
 }
 
 void FSpecifierCollector::Dump()
@@ -91,13 +131,13 @@ void FSpecifierCollector::Dump()
 			<< " " << (Stat.first.bMetadata ? "meta" : "") 
 			<< std::endl;
 
-		for (const std::pair<const FString, int32>& File : Stat.second)
+		for (const std::pair<const FString, int32>& Appearance : Stat.second)
 		{
 			std::cout 
 				<< "\t" 
-				<< File.first 
+				<< Appearance.first 
 				<< " --> " 
-				<< File.second 
+				<< Appearance.second 
 				<< std::endl;
 		}
 
