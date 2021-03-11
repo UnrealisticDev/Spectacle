@@ -2,22 +2,26 @@
 
 #include "CollectionTypes.h"
 
-/** Does something... */
+/** 
+ * Collects specifiers from a provided repository
+ * and farms out upload of stats
+ * related to same. 
+ */
 class FSpecifierCollector
 {
 public:
 
-	/** 
-	 * Gather specifiers found in the provided directory 
-	 * and output relevant stats. 
-	 */
-	bool GatherSpecifiers(const char* Directory, FSpecifierStats& OutStats);
+	/** Identify specifiers in the provided directory. */
+	void ParseSpecifiers(const char* Directory);
 
-	/** Prints out debug information regarding specifier stats. */
-	static void Dump(const FSpecifierStats& Stats);
+	/** Upload specifier stats to server. */
+	void Upload();
+
+	/** Print out debug information regarding parsed stats. */
+	void Dump();
 
 private:
 
-	/** The root directory from which we begin parsing. */
-	const char* _WorkingDirectory;
+	/** Collection of specifier stats. */
+	FSpecifierStats Stats;
 };

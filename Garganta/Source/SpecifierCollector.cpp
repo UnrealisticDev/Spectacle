@@ -5,17 +5,17 @@
 #include "json.hpp"
 #include <fstream>
 
-bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStats& OutStats)
+void FSpecifierCollector::ParseSpecifiers(const char* Directory)
 {
 	namespace fs = std::filesystem;
 
 	if ( !fs::exists(Directory) || !fs::is_directory(Directory) )
 	{
 		std::cerr << "Source directory" << Directory << "does not exist.";
-		return false;
+		return;
 	}
 
-	OutStats.clear();
+	Stats.clear();
 	FString ResultPath = "Results.json";
 	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(Directory))
 	{
@@ -65,7 +65,7 @@ bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStat
 						Result["key"].get<FString>()
 					);
 					
-					OutStats[Specifier][SourcePath.path().string()] = Result["count"];
+					Stats[Specifier][SourcePath.path().string()] = Result["count"];
 				}
 			}
 			catch(std::exception& e)
@@ -74,11 +74,14 @@ bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStat
 			}
 		}
 	}
-
-	return true;
 }
 
-void FSpecifierCollector::Dump(const FSpecifierStats& Stats)
+void FSpecifierCollector::Upload()
+{
+	// no op
+}
+
+void FSpecifierCollector::Dump()
 {
 	for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
 	{
