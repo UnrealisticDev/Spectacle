@@ -1,6 +1,7 @@
 #include "Lexer.h"
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 
 bool FChar::IsNewline(char Char)
 {
@@ -191,8 +192,7 @@ bool FLexer::GetToken(FToken& Token)
 				{
 					if (Char == 0)
 					{
-						std::cout << "End of file reached before comment terminated.\n";
-						return false;
+						throw std::runtime_error("End of file reached before comment terminated.\n");
 					}
 
 					Token.Value += Char;
