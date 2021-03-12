@@ -55,22 +55,22 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 	File.open(Filepath);
 	if (File.is_open())
 	{
-		using json = nlohmann::json;
-		json Result;
+		using FJson = nlohmann::FJson;
+		FJson Result;
 		{
 			Result["data"] = {};
 		}
 
 		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
 		{
-			json Spec;
+			FJson Spec;
 			{
 				Spec["type"] = ToString(SpecifierCount.first.Type);
 				Spec["key"] = SpecifierCount.first.Key;
 				Spec["meta"] = SpecifierCount.first.bMetadata;
 				Spec["count"] = SpecifierCount.second;
 			}
-			Result["data"] += Spec;
+			Result["items"] += Spec;
 		}
 		
 		File << Result.dump();
