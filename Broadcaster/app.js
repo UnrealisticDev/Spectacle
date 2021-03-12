@@ -10,7 +10,6 @@ if ( !parsedDatasetPath ) {
     return console.error("No parsed dataset file provided.")
 }
 console.log("Received dataset file: " + parsedDatasetPath);
-console.
 
 console.log("Loading dataset.");
 var parsedDataset;
@@ -22,8 +21,7 @@ try {
 } catch (error) {
     return console.log("Failed to open or parse dataset file: " + error);
 }
-console.log("Loaded dataset successfully.");
-console.log("Dataset contains %d entries", parsedDataset.data.length);
+console.log("Loaded dataset successfully. Contains %d entries.", parsedDataset.data.length);
 
 /**
  * Request all current specifier entries from Contentful
