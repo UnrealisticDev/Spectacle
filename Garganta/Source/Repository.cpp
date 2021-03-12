@@ -2,28 +2,59 @@
 #include "git2.h"
 #include <iostream>
 #include <filesystem>
+#include "CoreTypes.h"
 
-bool FRepository::Clone(const char* RepoURL, const char* Destination)
+bool FRepository::Clone(const char* RepoURL, const char* Branch, TArray<const char*> Paths, const char* Destination)
 {
 	if ( DirectoryAlreadyExists(Destination) )
 	{
-		FixupDirectoryPermissions(Destination);
 		Cleanup(Destination);
 	}
 
-	git_libgit2_init();
+	FString RepoRoot = RepoURL;
 
-	git_repository* Repository = nullptr;
-	if ( git_clone(&Repository, RepoURL, Destination, nullptr) != 0 )
+	if ( Branch )
 	{
-		std::cerr << "Clone failed: " << git_error_last()->message << std::endl;
-		return false;
+		RepoRoot += "/branches/";
+		RepoRoot += Branch;
+		RepoRoot += "/";
 	}
 
-	git_repository_free(Repository);
-	git_libgit2_shutdown();
+	else
+	{
+		RepoRoot += "/trunk/"; // In SVN, refers to main branch
+	}
 
-	return FixupDirectoryPermissions(Destination);
+	if ( Paths.size() > 0 )
+	{
+		for (const char* SubPath : Paths)
+		{
+			FString FullPath = RepoRoot + SubPath;
+			std::cout << "Exporting: " + FullPath << std::endl;
+			FString ExportCommand = "svn";
+			{
+				ExportCommand += " export";
+				ExportCommand += " " + FullPath + " ";
+				ExportCommand += Destination;
+				ExportCommand += "/";
+				ExportCommand += SubPath;
+			}
+			std::system(ExportCommand.c_str());
+		}
+	}
+
+	else
+	{
+		FString ExportCommand = "svn";
+		{
+			ExportCommand += " export";
+			ExportCommand += " " + RepoRoot + " ";
+			ExportCommand += Destination;
+		}
+		std::system(ExportCommand.c_str());
+	}
+
+	return true;
 }
 
 bool FRepository::Cleanup(const char* Directory)
