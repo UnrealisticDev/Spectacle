@@ -10,13 +10,13 @@ int main(int ArgumentCount, char* Arguments[])
 		"Engine/Source/Editor",
 		"Engine/Source/Developer"
 	};
-	const char* StagingDirectory = "Temp";
+	const char* StagingDirectory = "Staging";
 
 	FRepository::Clone(RepoURL, Branch, Paths, StagingDirectory);
 
 	FSpecifierCollector SpecifierCollector;
 	{
-		//SpecifierCollector.ParseSpecifiers(StagingDirectory);
+		SpecifierCollector.ParseSpecifiers(StagingDirectory);
 		//SpecifierCollector.Dump();
 		//SpecifierCollector.Upload();
 	}
