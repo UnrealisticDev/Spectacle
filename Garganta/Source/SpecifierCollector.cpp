@@ -1,77 +1,37 @@
 #include "SpecifierCollector.h"
-#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include "CoreTypes.h"
-#include "json.hpp"
 
-void FSpecifierCollector::ParseSpecifiers(const char* Directory)
+void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const char* ResultsDirectory)
 {
 	namespace fs = std::filesystem;
 
-	if ( !fs::exists(Directory) || !fs::is_directory(Directory) )
+	if ( !fs::exists(SourceDirectory) || !fs::is_directory(SourceDirectory) )
 	{
-		std::cerr << "Source directory" << Directory << "does not exist.";
+		std::cerr << "Source directory" << SourceDirectory << "does not exist.";
 		return;
 	}
 
+	if ( !fs::exists(ResultsDirectory) || !fs::is_directory(ResultsDirectory) )
+	{
+		fs::create_directory(ResultsDirectory);
+	}
+
 	Stats.clear();
-	FString ResultPath = "Results.json";
-	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(Directory))
+
+	const FString ResultPath = "Results.json";
+	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(SourceDirectory))
 	{
 		if ( !SourcePath.is_directory() && SourcePath.path().extension() == ".h" )
 		{
-			// Run parse subprocess - results in output at Results.json
 			FString ParseCommand = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe";
 			ParseCommand += " " + SourcePath.path().string();
 			ParseCommand += " " + ResultPath;
 			std::system(ParseCommand.c_str());
 
-			// Load parse results
-			using json = nlohmann::json;
-
-			FString FileContent;
-			std::ifstream File(ResultPath);
-
-			try {
-				if (File.is_open())
-				{
-					FString Line = "";
-					while (!File.eof())
-					{
-						std::getline(File, Line);
-						FileContent += Line + "\n\r"; // Normalize line endings
-					}
-				}
-			}
-			catch (std::exception& e)
-			{
-				std::cout << "Failed to load result file: " << e.what() << "\n";
-			}
-
-			try {
-				json Results = json::parse(FileContent);
-
-				assert(Results.is_object());
-				for (const json& Result : Results["data"])
-				{
-					assert(Result.is_object());
-
-					// Append to collection
-					FUnrealSpecifier Specifier
-					(
-						Result["type"].get<FString>(),
-						Result["meta"].get<bool>(),
-						Result["key"].get<FString>()
-					);
-					
-					Stats[Specifier][SourcePath.path().string()] = Result["count"];
-				}
-			}
-			catch(std::exception& e)
-			{
-				std::cout << "Failed to parse result file: " << e.what() << "\n";
-			}
+			FJson Results = FJson::parse(std::ifstream(ResultPath));
+			SaveResults(Results, SourcePath.path().lexically_relative(SourceDirectory));
 		}
 	}
 }
@@ -143,5 +103,60 @@ void FSpecifierCollector::Dump()
 		}
 
 		std::cout << std::endl;
+	}
+}
+
+void FSpecifierCollector::Cleanup(const char* ResultsDirectory)
+{
+	namespace fs = std::filesystem;
+
+	if ( fs::exists(ResultsDirectory) && fs::is_directory(ResultsDirectory) )
+	{
+		fs::remove_all(ResultsDirectory);
+	}
+}
+
+void FSpecifierCollector::SaveResults(const FJson& Results, std::filesystem::path RelativeSourcePath)
+{
+	namespace fs = std::filesystem;
+	for (const auto& Item : Results["items"])
+	{
+		assert(Item.contains("type") && Item.contains("key") && Item.contains("meta"));
+		
+		fs::path SavePath = "Results";
+		SavePath /= Item["type"].get<FString>() + "_" + Item["key"].get<FString>();
+		SavePath += ".json";
+
+		std::cout << SavePath.string() << std::endl;
+
+		if ( fs::exists(SavePath) )
+		{
+			FJson Existing = FJson::parse(std::ifstream(SavePath));
+			std::ofstream SaveFile(SavePath);
+			Existing["occ"].push_back({
+				{ "file", RelativeSourcePath.string() },
+				{ "count", Item["count"] }
+			});
+			SaveFile << Existing.dump();
+		}
+
+		else
+		{
+			std::ofstream SaveFile(SavePath);
+			FJson Fresh;
+			{
+				Fresh["type"] = Item["type"];
+				Fresh["key"] = Item["key"];
+				Fresh["meta"] = Item["meta"];
+				Fresh["occ"] = FJson::array
+				({
+					{
+						{"file", RelativeSourcePath.string()},
+						{"count", Item["count"] }
+					}
+				});
+			};
+			SaveFile << Fresh.dump();
+		}
 	}
 }

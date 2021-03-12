@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CollectionTypes.h"
+#include "json.hpp"
+#include <filesystem>
 
 /** 
  * Collects specifiers from a provided repository
@@ -11,8 +13,11 @@ class FSpecifierCollector
 {
 public:
 
-	/** Identify specifiers in the provided directory. */
-	void ParseSpecifiers(const char* Directory);
+	/** 
+	 * Identify specifiers in the provided directory. 
+	 * and output results to file.
+	 */
+	void ParseSpecifiers(const char* SourceDirectory, const char* ResultsDirectory);
 
 	/** Upload specifier stats to server. */
 	void Upload();
@@ -20,7 +25,21 @@ public:
 	/** Print out debug information regarding parsed stats. */
 	void Dump();
 
+	/** Cleans up the results directory. */
+	void Cleanup(const char* ResultsDirectory);
+
 private:
+
+	using FJson = nlohmann::json;
+
+private:
+
+	/** 
+	 * Saves specifiers to file.
+	 * Each unique specifier will have its 
+	 * own file associated with it.
+	 */
+	void SaveResults(const FJson& Results, std::filesystem::path RelativeSourcePath);
 
 	/** Collection of specifier stats. */
 	FSpecifierStats Stats;
