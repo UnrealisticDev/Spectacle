@@ -58,7 +58,7 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 		using FJson = nlohmann::FJson;
 		FJson Result;
 		{
-			Result["data"] = {};
+			Result["items"] = {};
 		}
 
 		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
