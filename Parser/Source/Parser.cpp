@@ -5,7 +5,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <assert.h>
-#include "json.hpp
+#include "json.hpp"
 
 FParser::FParser()
 {
