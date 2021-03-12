@@ -152,10 +152,10 @@
     <ClInclude Include="Source\ParsingTypes.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Test\Test.txt" />
+    <None Include="Out\Output.json" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Out\Output.json" />
+    <Text Include="Sample\Sample.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
