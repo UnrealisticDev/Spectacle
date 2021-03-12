@@ -55,7 +55,7 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 	File.open(Filepath);
 	if (File.is_open())
 	{
-		using FJson = nlohmann::FJson;
+		using FJson = nlohmann::json;
 		FJson Result;
 		{
 			Result["items"] = {};
