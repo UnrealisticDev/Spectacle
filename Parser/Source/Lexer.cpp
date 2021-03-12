@@ -68,10 +68,14 @@ TArray<FToken> FLexer::Tokenize(const char* InSource)
 	Reset(InSource);
 
 	TArray<FToken> Tokens;
+	
 	FToken Token;
-
 	while (GetToken(Token))
 	{
+		if (Token.Type == ETokenType::Comment)
+		{
+			continue;
+		}
 		Tokens.push_back(Token);
 	}
 
