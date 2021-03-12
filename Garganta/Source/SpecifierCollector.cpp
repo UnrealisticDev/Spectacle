@@ -78,17 +78,17 @@ void FSpecifierCollector::ParseSpecifiers(const char* Directory)
 
 void FSpecifierCollector::Upload()
 {
-	const FString DatabasePath = "Database.json";
-	std::ofstream Database(DatabasePath);
-	if ( !Database.is_open())
+	const FString ParsedDatasetPath = "Dataset.json";
+	std::ofstream ParsedDataset(ParsedDatasetPath);
+	if ( !ParsedDataset.is_open())
 	{
-		std::cerr << "Failed to open/create Database.json";
+		std::cerr << "Failed to open/create Dataset.json";
 	}
 
 	using json = nlohmann::json;
-	json Data;
+	json jDataset;
 	{
-		Data["data"] = {};
+		jDataset["data"] = {};
 		for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
 		{
 			json jStat;
@@ -99,26 +99,27 @@ void FSpecifierCollector::Upload()
 			jStat["appearances"] = {};
 			for (const std::pair<const FString, int32>& Appearance : Stat.second)
 			{
-				json App;
-				App["file"] = Appearance.first;
-				App["count"] = Appearance.second;
+				json jAppearance;
+				jAppearance["file"] = Appearance.first;
+				jAppearance["count"] = Appearance.second;
 
-				jStat["appearances"] += App;
+				jStat["appearances"] += jAppearance;
 			}
 
-			Data["data"] += jStat;
+			jDataset["data"] += jStat;
 		}
 	}
 
-	Database << Data;
-	Database.close();
+	ParsedDataset << jDataset;
+	ParsedDataset.close();
 
-	std::system
-	(
-		"node"
-		" F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js"
-		" Database.json"
-	);
+	FString UploadCommand = "node";
+	{
+		UploadCommand += " F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js";
+		UploadCommand += " ";
+		UploadCommand += ParsedDatasetPath;
+	}
+	std::system(UploadCommand.c_str());
 }
 
 void FSpecifierCollector::Dump()
