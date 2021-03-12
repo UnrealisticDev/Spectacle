@@ -351,3 +351,7 @@ Test/
 
 # Local environment file
 .env
+
+#Staging and Results files
+/Garganta/Staging
+/Garganta/Results
