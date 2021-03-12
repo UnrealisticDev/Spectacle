@@ -55,11 +55,6 @@ void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString&
 	File.open(Filepath);
 	if (File.is_open())
 	{
-		auto Quotes = [](const FString& Format) -> FString
-		{
-			return '"' + Format + '"';
-		};
-
 		using json = nlohmann::json;
 		json Result;
 		{

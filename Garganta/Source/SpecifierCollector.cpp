@@ -1,21 +1,21 @@
 #include "SpecifierCollector.h"
 #include <filesystem>
 #include <iostream>
+#include <fstream>
 #include "CoreTypes.h"
 #include "json.hpp"
-#include <fstream>
 
-bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStats& OutStats)
+void FSpecifierCollector::ParseSpecifiers(const char* Directory)
 {
 	namespace fs = std::filesystem;
 
 	if ( !fs::exists(Directory) || !fs::is_directory(Directory) )
 	{
 		std::cerr << "Source directory" << Directory << "does not exist.";
-		return false;
+		return;
 	}
 
-	OutStats.clear();
+	Stats.clear();
 	FString ResultPath = "Results.json";
 	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(Directory))
 	{
@@ -65,7 +65,7 @@ bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStat
 						Result["key"].get<FString>()
 					);
 					
-					OutStats[Specifier][SourcePath.path().string()] = Result["count"];
+					Stats[Specifier][SourcePath.path().string()] = Result["count"];
 				}
 			}
 			catch(std::exception& e)
@@ -74,11 +74,55 @@ bool FSpecifierCollector::GatherSpecifiers(const char* Directory, FSpecifierStat
 			}
 		}
 	}
-
-	return true;
 }
 
-void FSpecifierCollector::Dump(const FSpecifierStats& Stats)
+void FSpecifierCollector::Upload()
+{
+	const FString ParsedDatasetPath = "Dataset.json";
+	std::ofstream ParsedDataset(ParsedDatasetPath);
+	if ( !ParsedDataset.is_open())
+	{
+		std::cerr << "Failed to open/create Dataset.json";
+	}
+
+	using json = nlohmann::json;
+	json jDataset;
+	{
+		jDataset["items"] = {};
+		for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
+		{
+			json jStat;
+			jStat["type"] = Stat.first.Type;
+			jStat["meta"] = Stat.first.bMetadata;
+			jStat["key"] = Stat.first.Key;
+
+			jStat["appearances"] = {};
+			for (const std::pair<const FString, int32>& Appearance : Stat.second)
+			{
+				json jAppearance;
+				jAppearance["file"] = Appearance.first;
+				jAppearance["count"] = Appearance.second;
+
+				jStat["appearances"] += jAppearance;
+			}
+
+			jDataset["items"] += jStat;
+		}
+	}
+
+	ParsedDataset << jDataset;
+	ParsedDataset.close();
+
+	FString UploadCommand = "node";
+	{
+		UploadCommand += " F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js";
+		UploadCommand += " ";
+		UploadCommand += ParsedDatasetPath;
+	}
+	std::system(UploadCommand.c_str());
+}
+
+void FSpecifierCollector::Dump()
 {
 	for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
 	{
@@ -88,13 +132,13 @@ void FSpecifierCollector::Dump(const FSpecifierStats& Stats)
 			<< " " << (Stat.first.bMetadata ? "meta" : "") 
 			<< std::endl;
 
-		for (const std::pair<const FString, int32>& File : Stat.second)
+		for (const std::pair<const FString, int32>& Appearance : Stat.second)
 		{
 			std::cout 
 				<< "\t" 
-				<< File.first 
+				<< Appearance.first 
 				<< " --> " 
-				<< File.second 
+				<< Appearance.second 
 				<< std::endl;
 		}
 

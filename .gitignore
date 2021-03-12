@@ -348,4 +348,6 @@ Test/
 
 # Temp clone directory
 /Garganta/Temp
-Broadcaster/.env
+
+# Local environment file
+.env

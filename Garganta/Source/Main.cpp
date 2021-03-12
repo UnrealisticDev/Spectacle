@@ -8,10 +8,12 @@ int main()
 
 	FRepository::Clone(RepoURL, StagingDirectory);
 
-	FSpecifierStats SpecifierStats;
 	FSpecifierCollector SpecifierCollector;
-	SpecifierCollector.GatherSpecifiers(StagingDirectory, SpecifierStats);
-	FSpecifierCollector::Dump(SpecifierStats);
+	{
+		SpecifierCollector.ParseSpecifiers(StagingDirectory);
+		SpecifierCollector.Dump();
+		SpecifierCollector.Upload();
+	}
 
 	FRepository::Cleanup(StagingDirectory);
 }
