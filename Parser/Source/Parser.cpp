@@ -3,8 +3,9 @@
 #include <ios>
 #include <iomanip>
 #include <fstream>
+#include <stdexcept>
 #include <assert.h>
-#include "json.hpp"
+#include "json.hpp
 
 FParser::FParser()
 {
@@ -12,11 +13,9 @@ FParser::FParser()
 	PreviousPos = 0;
 }
 
-FSpecifierCountMap FParser::IdentifyUnrealSpecifiers(TArray<FToken> InTokens)
+void FParser::IdentifyUnrealSpecifiers(TArray<FToken> InTokens)
 {
 	Tokens = InTokens;
-
-	FSpecifierCountMap SpecifierCountMap;
 
 	FToken MacroToken;
 	while ( PeekToken().IsValid() )
@@ -31,49 +30,66 @@ FSpecifierCountMap FParser::IdentifyUnrealSpecifiers(TArray<FToken> InTokens)
 			);
 		}
 	}
-
-	return SpecifierCountMap;
 }
 
-void FParser::Dump(const FSpecifierCountMap& SpecifierCountMap)
+void FParser::ToJSON(const FString& Filepath)
 {
-	for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
-	{
-		std::cout << std::left << std::setfill(' ')
-			<< std::setw(16) << "(" + ToString(SpecifierCount.first.Type) + ")"
-			<< std::setw(8) << (SpecifierCount.first.bMetadata ? "meta" : " ")
-			<< std::setw(40) << SpecifierCount.first.Key
-			<< " --> " 
-			<< std::setw(8) << SpecifierCount.second 
-			<< std::endl;
-	}
-}
-
-void FParser::ToJSON(const FSpecifierCountMap& SpecifierCountMap, const FString& Filepath)
-{
-	std::ofstream File;
-	File.open(Filepath);
-	if (File.is_open())
+	std::ofstream OutputFile(Filepath);
+	if (OutputFile.is_open())
 	{
 		using FJson = nlohmann::json;
-		FJson Result;
+		FJson Output;
 		{
-			Result["items"] = {};
+			Output["items"] = {};
 		}
 
 		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
 		{
-			FJson Spec;
+			FJson Specifier;
 			{
-				Spec["type"] = ToString(SpecifierCount.first.Type);
-				Spec["key"] = SpecifierCount.first.Key;
-				Spec["meta"] = SpecifierCount.first.bMetadata;
-				Spec["count"] = SpecifierCount.second;
+				Specifier["type"] = ToString(SpecifierCount.first.Type);
+				Specifier["key"] = SpecifierCount.first.Key;
+				Specifier["meta"] = SpecifierCount.first.bMetadata;
+				Specifier["count"] = SpecifierCount.second;
 			}
-			Result["items"] += Spec;
+			Output["items"] += Specifier;
 		}
 		
-		File << Result.dump();
+		OutputFile << Output.dump();
+	}
+}
+
+void FParser::Dump(bool bVerbose /*= false*/)
+{
+	if (bVerbose)
+	{
+		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
+		{
+			std::cout << std::left << std::setfill(' ')
+				<< std::setw(16) << "(" + ToString(SpecifierCount.first.Type) + ")"
+				<< std::setw(8) << (SpecifierCount.first.bMetadata ? "meta" : " ")
+				<< std::setw(40) << SpecifierCount.first.Key
+				<< " --> "
+				<< std::setw(8) << SpecifierCount.second
+				<< std::endl;
+		}
+	}
+
+	else
+	{
+		int Index = 0;
+		std::cout << "Identified specifiers: [";
+		for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
+		{
+			if (Index > 0)
+			{
+				std::cout << ", ";
+			}
+			std::cout << SpecifierCount.first.Key;
+
+			++Index;
+		}
+		std::cout << "]" << std::endl;
 	}
 }
 
@@ -116,7 +132,7 @@ void FParser::RequirePunctuator(const FString& Query)
 {
 	if ( !MatchPunctuator(Query) )
 	{
-		throw;
+		throw std::runtime_error(FString("Missing punctuator: ") + Query);
 	}
 }
 
