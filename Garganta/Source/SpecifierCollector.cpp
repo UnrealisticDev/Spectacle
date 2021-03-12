@@ -18,8 +18,6 @@ void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const cha
 		fs::create_directory(ResultsDirectory);
 	}
 
-	Stats.clear();
-
 	const FString ResultPath = "Results.json";
 	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(SourceDirectory))
 	{
@@ -38,72 +36,48 @@ void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const cha
 
 void FSpecifierCollector::Upload()
 {
-	const FString ParsedDatasetPath = "Dataset.json";
-	std::ofstream ParsedDataset(ParsedDatasetPath);
-	if ( !ParsedDataset.is_open())
-	{
-		std::cerr << "Failed to open/create Dataset.json";
-	}
+	//const FString ParsedDatasetPath = "Dataset.json";
+	//std::ofstream ParsedDataset(ParsedDatasetPath);
+	//if ( !ParsedDataset.is_open())
+	//{
+	//	std::cerr << "Failed to open/create Dataset.json";
+	//}
 
-	using json = nlohmann::json;
-	json jDataset;
-	{
-		jDataset["items"] = {};
-		for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
-		{
-			json jStat;
-			jStat["type"] = Stat.first.Type;
-			jStat["meta"] = Stat.first.bMetadata;
-			jStat["key"] = Stat.first.Key;
+	//using json = nlohmann::json;
+	//json jDataset;
+	//{
+	//	jDataset["items"] = {};
+	//	for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
+	//	{
+	//		json jStat;
+	//		jStat["type"] = Stat.first.Type;
+	//		jStat["meta"] = Stat.first.bMetadata;
+	//		jStat["key"] = Stat.first.Key;
 
-			jStat["appearances"] = {};
-			for (const std::pair<const FString, int32>& Appearance : Stat.second)
-			{
-				json jAppearance;
-				jAppearance["file"] = Appearance.first;
-				jAppearance["count"] = Appearance.second;
+	//		jStat["appearances"] = {};
+	//		for (const std::pair<const FString, int32>& Appearance : Stat.second)
+	//		{
+	//			json jAppearance;
+	//			jAppearance["file"] = Appearance.first;
+	//			jAppearance["count"] = Appearance.second;
 
-				jStat["appearances"] += jAppearance;
-			}
+	//			jStat["appearances"] += jAppearance;
+	//		}
 
-			jDataset["items"] += jStat;
-		}
-	}
+	//		jDataset["items"] += jStat;
+	//	}
+	//}
 
-	ParsedDataset << jDataset;
-	ParsedDataset.close();
+	//ParsedDataset << jDataset;
+	//ParsedDataset.close();
 
-	FString UploadCommand = "node";
-	{
-		UploadCommand += " F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js";
-		UploadCommand += " ";
-		UploadCommand += ParsedDatasetPath;
-	}
-	std::system(UploadCommand.c_str());
-}
-
-void FSpecifierCollector::Dump()
-{
-	for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
-	{
-		std::cout 
-			<< "(" + Stat.first.Type + ")" 
-			<< " " << Stat.first.Key 
-			<< " " << (Stat.first.bMetadata ? "meta" : "") 
-			<< std::endl;
-
-		for (const std::pair<const FString, int32>& Appearance : Stat.second)
-		{
-			std::cout 
-				<< "\t" 
-				<< Appearance.first 
-				<< " --> " 
-				<< Appearance.second 
-				<< std::endl;
-		}
-
-		std::cout << std::endl;
-	}
+	//FString UploadCommand = "node";
+	//{
+	//	UploadCommand += " F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js";
+	//	UploadCommand += " ";
+	//	UploadCommand += ParsedDatasetPath;
+	//}
+	//std::system(UploadCommand.c_str());
 }
 
 void FSpecifierCollector::Cleanup(const char* ResultsDirectory)

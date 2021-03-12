@@ -22,9 +22,6 @@ public:
 	/** Upload specifier stats to server. */
 	void Upload();
 
-	/** Print out debug information regarding parsed stats. */
-	void Dump();
-
 	/** Cleans up the results directory. */
 	void Cleanup(const char* ResultsDirectory);
 
@@ -40,7 +37,4 @@ private:
 	 * own file associated with it.
 	 */
 	void SaveResults(const FJson& Results, std::filesystem::path RelativeSourcePath);
-
-	/** Collection of specifier stats. */
-	FSpecifierStats Stats;
 };

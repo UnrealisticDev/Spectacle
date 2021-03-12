@@ -6,9 +6,9 @@ int main(int ArgumentCount, char* Arguments[])
 	const char* RepoURL = "https://github.com/EpicGames/UnrealEngine";
 	const char* Branch = Arguments[1];
 	TArray<const char*> Paths = {
-		"Engine/Source/Runtime/UMG/Public"
-		//"Engine/Source/Editor",
-		//"Engine/Source/Developer"
+		"Engine/Source/Runtime",
+		"Engine/Source/Editor",
+		"Engine/Source/Developer"
 	};
 	const char* StagingDirectory = "Staging";
 	const char* ResultsDirectory = "Results";
@@ -18,10 +18,9 @@ int main(int ArgumentCount, char* Arguments[])
 	FSpecifierCollector SpecifierCollector;
 	{
 		SpecifierCollector.ParseSpecifiers(StagingDirectory, ResultsDirectory);
-		//SpecifierCollector.Dump();
 		//SpecifierCollector.Upload();
 		//SpecifierCollector.Cleanup(ResultsDirectory);
 	}
 
-	//FRepository::Cleanup(StagingDirectory);
+	FRepository::Cleanup(StagingDirectory);
 }
