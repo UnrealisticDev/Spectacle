@@ -2,6 +2,7 @@
 #include "git2.h"
 #include <iostream>
 #include <filesystem>
+#include <stdexcept>
 #include "CoreTypes.h"
 
 bool FRepository::Clone(const char* RepoURL, const char* Branch, TArray<const char*> Paths, const char* Destination)
@@ -23,6 +24,12 @@ bool FRepository::Clone(const char* RepoURL, const char* Branch, TArray<const ch
 	else
 	{
 		RepoRoot += "/trunk/"; // In SVN, refers to main branch
+	}
+
+	bool bRepoNotFound = std::system(("svn ls " + RepoRoot).c_str());
+	if ( bRepoNotFound )
+	{
+		throw std::invalid_argument("Repository does not exist: " + RepoRoot);
 	}
 
 	if ( Paths.size() > 0 )
