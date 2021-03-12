@@ -88,7 +88,7 @@ void FSpecifierCollector::Upload()
 	using json = nlohmann::json;
 	json jDataset;
 	{
-		jDataset["data"] = {};
+		jDataset["items"] = {};
 		for (const std::pair<FUnrealSpecifier, std::unordered_map<FString, int32>>& Stat : Stats)
 		{
 			json jStat;
@@ -106,7 +106,7 @@ void FSpecifierCollector::Upload()
 				jStat["appearances"] += jAppearance;
 			}
 
-			jDataset["data"] += jStat;
+			jDataset["items"] += jStat;
 		}
 	}
 
