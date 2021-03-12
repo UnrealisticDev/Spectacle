@@ -78,22 +78,3 @@ bool FRepository::DirectoryAlreadyExists(const char* Directory)
 	namespace fs = std::filesystem;
 	return fs::exists(Directory) && fs::is_directory(Directory);
 }
-
-bool FRepository::FixupDirectoryPermissions(const char* Directory)
-{
-	namespace fs = std::filesystem;
-	for (const fs::directory_entry& Path : fs::recursive_directory_iterator(Directory))
-	{
-		try
-		{
-			fs::permissions(Path, fs::perms::all);
-		}
-		catch (std::exception&)
-		{
-			std::cout << "Error setting permissions on repository.";
-			return false;
-		}
-	}
-
-	return true;
-}
