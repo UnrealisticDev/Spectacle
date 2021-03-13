@@ -253,7 +253,10 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 
 				if ( MatchPunctuator("=") )
 				{
-					GetToken(); // Value
+					while ( PeekToken().Value != "," && PeekToken().Value != ")" )
+					{
+						GetToken(); // Value
+					}
 				}
 			}
 		}
@@ -284,7 +287,10 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 
 				else
 				{
-					GetToken(); // Value
+					while ( PeekToken().Value != "," && PeekToken().Value != ")" )
+					{
+						GetToken(); // Value
+					}
 				}
 			}
 
