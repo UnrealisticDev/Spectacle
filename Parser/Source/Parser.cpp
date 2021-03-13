@@ -294,6 +294,14 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 				}
 			}
 
+			else if ( MatchPunctuator("(") )
+			{
+				while ( !MatchPunctuator(")") )
+				{
+					GetToken(); // Value
+				}
+			}
+
 			else
 			{
 				// no op
