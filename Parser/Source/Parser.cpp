@@ -205,10 +205,17 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 
 	while ( !MatchPunctuator(")") )
 	{
-		if (SpecifierCount > 0)
+		if ( SpecifierCount > 0 )
 		{
 			RequirePunctuator(",");
 		}
+
+		if ( PeekToken().Type != ETokenType::Identifier )
+		{
+			GetToken();
+			continue;
+		}
+
 		++SpecifierCount;
 
 		FToken Specifier = GetToken();
