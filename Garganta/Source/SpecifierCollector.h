@@ -36,5 +36,5 @@ private:
 	 * Each unique specifier will have its 
 	 * own file associated with it.
 	 */
-	void SaveResults(const FJson& Results, std::filesystem::path RelativeSourcePath);
+	void SaveResults(const FJson& Results, const std::filesystem::path& RelativeSourcePath);
 };

@@ -18,18 +18,43 @@ void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const cha
 		fs::create_directory(ResultsDirectory);
 	}
 
-	const FString ResultPath = "Results.json";
+	const FString ParseOutputPath = "Output.json";
 	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(SourceDirectory))
 	{
 		if ( !SourcePath.is_directory() && SourcePath.path().extension() == ".h" )
 		{
+			const fs::path RelativeSourcePath = SourcePath.path().lexically_relative(SourceDirectory);
 			FString ParseCommand = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe";
-			ParseCommand += " " + SourcePath.path().string();
-			ParseCommand += " " + ResultPath;
-			std::system(ParseCommand.c_str());
+			{
+				ParseCommand += " " + SourcePath.path().string();
+				ParseCommand += " " + ParseOutputPath;
+			}
 
-			FJson Results = FJson::parse(std::ifstream(ResultPath));
-			SaveResults(Results, SourcePath.path().lexically_relative(SourceDirectory));
+			std::cout << "Parsing: " << RelativeSourcePath.string() << std::endl;
+
+			try 
+			{
+				std::system(ParseCommand.c_str());
+			}
+
+			catch (...) 
+			{
+				std::cout << "\tSomething went wrong in parsing source..." << std::endl;
+				continue;
+			}
+
+			FJson Results;
+			try
+			{
+				Results = FJson::parse(std::ifstream(ParseOutputPath));
+			}
+			
+			catch (...)
+			{
+				std::cout << "\tSomething went wrong in parsing output..." << std::endl;
+			}
+
+			SaveResults(Results, RelativeSourcePath);
 		}
 	}
 }
@@ -90,47 +115,55 @@ void FSpecifierCollector::Cleanup(const char* ResultsDirectory)
 	}
 }
 
-void FSpecifierCollector::SaveResults(const FJson& Results, std::filesystem::path RelativeSourcePath)
+void FSpecifierCollector::SaveResults(const FJson& Results, const std::filesystem::path& RelativeSourcePath)
 {
-	namespace fs = std::filesystem;
-	for (const auto& Item : Results["items"])
+	try
 	{
-		assert(Item.contains("type") && Item.contains("key") && Item.contains("meta"));
-		
-		fs::path SavePath = "Results";
-		SavePath /= Item["type"].get<FString>() + "_" + Item["key"].get<FString>();
-		SavePath += ".json";
-
-		std::cout << SavePath.string() << std::endl;
-
-		if ( fs::exists(SavePath) )
+		namespace fs = std::filesystem;
+		for (const auto& Item : Results["items"])
 		{
-			FJson Existing = FJson::parse(std::ifstream(SavePath));
-			std::ofstream SaveFile(SavePath);
-			Existing["occ"].push_back({
-				{ "file", RelativeSourcePath.string() },
-				{ "count", Item["count"] }
-			});
-			SaveFile << Existing.dump();
-		}
+			assert(Item.contains("type") && Item.contains("key") && Item.contains("meta"));
 
-		else
-		{
-			std::ofstream SaveFile(SavePath);
-			FJson Fresh;
+			fs::path SavePath = "Results";
+			SavePath /= Item["type"].get<FString>() + "_" + Item["key"].get<FString>();
+			SavePath += ".json";
+
+			//std::cout << SavePath.string() << std::endl;
+
+			if (fs::exists(SavePath))
 			{
-				Fresh["type"] = Item["type"];
-				Fresh["key"] = Item["key"];
-				Fresh["meta"] = Item["meta"];
-				Fresh["occ"] = FJson::array
-				({
-					{
-						{"file", RelativeSourcePath.string()},
-						{"count", Item["count"] }
-					}
-				});
-			};
-			SaveFile << Fresh.dump();
+				FJson Existing = FJson::parse(std::ifstream(SavePath));
+				std::ofstream SaveFile(SavePath);
+				Existing["occ"].push_back({
+					{ "file", RelativeSourcePath.string() },
+					{ "count", Item["count"] }
+					});
+				SaveFile << Existing.dump();
+			}
+
+			else
+			{
+				std::ofstream SaveFile(SavePath);
+				FJson Fresh;
+				{
+					Fresh["type"] = Item["type"];
+					Fresh["key"] = Item["key"];
+					Fresh["meta"] = Item["meta"];
+					Fresh["occ"] = FJson::array
+					({
+						{
+							{"file", RelativeSourcePath.string()},
+							{"count", Item["count"] }
+						}
+						});
+				};
+				SaveFile << Fresh.dump();
+			}
 		}
+	}
+
+	catch (...)
+	{
+		std::cout << "Something went wrong while saving results." << std::endl;
 	}
 }

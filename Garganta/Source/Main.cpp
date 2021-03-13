@@ -6,9 +6,9 @@ int main(int ArgumentCount, char* Arguments[])
 	const char* RepoURL = "https://github.com/EpicGames/UnrealEngine";
 	const char* Branch = Arguments[1];
 	TArray<const char*> Paths = {
-		"Engine/Source/Runtime",
-		"Engine/Source/Editor",
-		"Engine/Source/Developer"
+		"Engine/Source/Runtime"
+		//"Engine/Source/Editor",
+		//"Engine/Source/Developer"
 	};
 	const char* StagingDirectory = "Staging";
 	const char* ResultsDirectory = "Results";
