@@ -1,8 +1,9 @@
+#include <iostream>
+#include <filesystem>
 #include "Repository.h"
 #include "SpecifierCollector.h"
 #include "CoreTypes.h"
 #include "CorePath.h"
-#include "iostream"
 
 int main(int ArgumentCount, char* Arguments[])
 {
@@ -17,22 +18,14 @@ int main(int ArgumentCount, char* Arguments[])
 
 	FPaths::CreateTempDirectory();
 
-	FRepository::Clone
-	(
-		RepoURL, Branch, Directories, 
-		FPaths::SourceDirectory()
-	);
+	FRepository::Clone(RepoURL, Branch, Directories);
 
-	//FSpecifierCollector SpecifierCollector;
+	FSpecifierCollector SpecifierCollector;
 	{
-	//	SpecifierCollector.ParseSpecifiers(StagingDirectory, ResultsDirectory);
-	//	SpecifierCollector.TrimResults(ResultsDirectory, 5);
+		SpecifierCollector.ParseSpecifiers();
+		SpecifierCollector.TrimResults(5);
 	//	SpecifierCollector.Upload();
-	//	SpecifierCollector.Cleanup(ResultsDirectory);
 	}
 
-	FRepository::Cleanup
-	(
-		FPaths::SourceDirectory()
-	);
+	std::filesystem::remove_all(FPaths::TempDirectory());
 }

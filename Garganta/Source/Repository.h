@@ -22,7 +22,4 @@ struct FRepository
 	 * @see https://stackoverflow.com/questions/7106012/download-a-single-folder-or-directory-from-a-github-repo
 	 */
 	static bool Clone(FString RepoURL, FString Branch, TArray<FString> Directories);
-
-	/** Cleans up the repository in the provided directory. */
-	static bool Cleanup();
 };

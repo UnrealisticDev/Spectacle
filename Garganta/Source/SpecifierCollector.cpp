@@ -197,8 +197,3 @@ void FSpecifierCollector::Upload()
 
 	std::system(UploadCommand.c_str());
 }
-
-void FSpecifierCollector::Cleanup()
-{
-	std::filesystem::remove_all(FPaths::ResultsDirectory());
-}

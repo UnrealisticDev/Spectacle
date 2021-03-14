@@ -65,8 +65,4 @@ public:
 
 	/** Upload specifier stats to server. */
 	void Upload();
-
-	/** Cleans up the results directory. */
-	void Cleanup();
-
 };

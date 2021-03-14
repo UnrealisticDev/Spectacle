@@ -10,11 +10,6 @@ bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directo
 {
 	std::filesystem::path Destination = FPaths::SourceDirectory();
 
-	if ( std::filesystem::is_directory(Destination) )
-	{
-		Cleanup();
-	}
-
 	if ( !Branch.empty() )
 	{
 		RepoURL
@@ -70,22 +65,6 @@ bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directo
 			.append(Destination.string());
 
 		std::system(ExportCommand.c_str());
-	}
-
-	return true;
-}
-
-bool FRepository::Cleanup()
-{
-	namespace fs = std::filesystem;
-	try
-	{
-		fs::remove_all(FPaths::SourceDirectory());
-	}
-	catch (fs::filesystem_error e)
-	{
-		std::cerr << "Failed to clear source directory: " << e.what();
-		return false;
 	}
 
 	return true;
