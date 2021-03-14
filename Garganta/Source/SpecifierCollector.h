@@ -15,22 +15,19 @@ class FSpecifierCollector
 public:
 
 	/** 
-	 * Identify specifiers in the provided directory. 
-	 * and output results to file.
+	 * Identify specifiers in the source directory. 
+	 * and output results to results directory.
 	 */
-	void ParseSpecifiers(const char* SourceDirectory, const char* ResultsDirectory);
-
-	/** Upload specifier stats to server. */
-	void Upload();
-
-	/** Cleans up the results directory. */
-	void Cleanup(const char* ResultsDirectory);
+	void ParseSpecifiers();
 
 private:
 
 	using FJson = nlohmann::json;
 
 private:
+
+	/** ... */
+	void ValidateParsedSpecifier(const FJson& ParsedSpecifier);
 
 	/** 
 	 * Ensures that a result has valid type, key, and meta values
@@ -42,6 +39,7 @@ private:
 	 * Returns a unique filename that depends on the
 	 * specifier type and key provided.
 	 */
+	FString GetResultFilename(const FJson& Type, const FJson& Key) const;
 	FString GetResultFilename(const FJson& Result) const;
 
 public:
@@ -50,20 +48,25 @@ public:
 	 * Trims all results down to desired size on a
 	 * per-specifier basis.
 	 */
-	void TrimResults(const char* ResultsDirectory, int Size);
+	void TrimResults(int Size);
 
 private:
 
 	/** Trims result down to desired size. */
 	void TrimResult(FJson& Result, int Size);
 
-	/** 
-	 * Saves specifiers to file.
-	 * Each unique specifier will have its 
-	 * own file associated with it.
-	 */
-	void SaveResults(const FJson& Results, const std::filesystem::path& RelativeSourcePath);
+	/** Converts parsed specifier to result. */
+	void ConvertParsedSpecifierToResult(const FJson& ParsedSpecifier, const std::filesystem::path& RelativeSourcePath, FJson& Result);
 
 	/** Saves a result to file. */
 	void SaveResult(const FJson& Result);
+
+public:
+
+	/** Upload specifier stats to server. */
+	void Upload();
+
+	/** Cleans up the results directory. */
+	void Cleanup();
+
 };

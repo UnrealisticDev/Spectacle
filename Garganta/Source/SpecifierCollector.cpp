@@ -3,10 +3,15 @@
 #include <fstream>
 #include <algorithm>
 #include "CoreTypes.h"
+#include "CorePath.h"
 
-void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const char* ResultsDirectory)
+void FSpecifierCollector::ParseSpecifiers()
 {
 	namespace fs = std::filesystem;
+	fs::path SourceDirectory = FPaths::SourceDirectory();
+	fs::path ResultsDirectory = FPaths::ResultsDirectory();
+	const FString ParsedOutputFilename = "Parsed.json";
+	const fs::path ParsedOutputPath = FPaths::TempDirectory().append(ParsedOutputFilename);
 
 	if ( !fs::exists(SourceDirectory) || !fs::is_directory(SourceDirectory) )
 	{
@@ -19,22 +24,22 @@ void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const cha
 		fs::create_directory(ResultsDirectory);
 	}
 
-	const FString ParseOutputPath = "Output.json";
 	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(SourceDirectory))
 	{
 		if ( !SourcePath.is_directory() && SourcePath.path().extension() == ".h" )
 		{
 			const fs::path RelativeSourcePath = SourcePath.path().lexically_relative(SourceDirectory);
-			FString ParseCommand = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe";
-			{
-				ParseCommand += " " + SourcePath.path().string();
-				ParseCommand += " " + ParseOutputPath;
-			}
-
 			std::cout << "Parsing: " << RelativeSourcePath.string() << std::endl;
 
 			try 
 			{
+				FString ParseCommand = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe";
+				ParseCommand
+					.append(" ")
+					.append(SourcePath.path().string())
+					.append(" ")
+					.append(ParsedOutputFilename);
+
 				std::system(ParseCommand.c_str());
 			}
 
@@ -44,40 +49,74 @@ void FSpecifierCollector::ParseSpecifiers(const char* SourceDirectory, const cha
 				continue;
 			}
 
-			FJson Results;
+			FJson ParsedSpecifiers;
 			try
 			{
-				Results = FJson::parse(std::ifstream(ParseOutputPath));
+				ParsedSpecifiers = FJson::parse(std::ifstream(ParsedOutputPath));
 			}
 			
 			catch (...)
 			{
 				std::cout << "\tSomething went wrong in parsing output..." << std::endl;
+				continue;
 			}
 
-			SaveResults(Results, RelativeSourcePath);
+			FJson Result;
+			for (const FJson& ParsedSpecifier : ParsedSpecifiers["items"])
+			{
+				ValidateParsedSpecifier(ParsedSpecifier);
+				ConvertParsedSpecifierToResult(ParsedSpecifier, RelativeSourcePath, Result);
+				ValidateResult(Result);
+				SaveResult(Result);
+			}
 		}
 	}
 }
 
-void FSpecifierCollector::Upload()
+void FSpecifierCollector::ValidateParsedSpecifier(const FJson& ParsedSpecifier)
 {
-	FString UploadCommand = "node";
-	{
-		UploadCommand += " F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js";
-		UploadCommand += " ";
-		UploadCommand += "Results";
-	}
-	std::system(UploadCommand.c_str());
+	assert(ParsedSpecifier["type"].is_string());
+	assert(ParsedSpecifier["key"].is_string());
+	assert(ParsedSpecifier["meta"].is_boolean());
+	assert(ParsedSpecifier["count"].is_number() && ParsedSpecifier["count"].get<int32>() > 0);
 }
 
-void FSpecifierCollector::Cleanup(const char* ResultsDirectory)
+void FSpecifierCollector::ConvertParsedSpecifierToResult(const FJson& ParsedSpecifier, const std::filesystem::path& RelativeSourcePath, FJson& Result)
 {
-	namespace fs = std::filesystem;
-
-	if ( fs::exists(ResultsDirectory) && fs::is_directory(ResultsDirectory) )
+	try
 	{
-		fs::remove_all(ResultsDirectory);
+		Result.clear();
+
+		namespace fs = std::filesystem;
+		fs::path ResultFilePath = FPaths::TempDirectory().append(GetResultFilename(ParsedSpecifier["type"], ParsedSpecifier["key"]));
+		if ( fs::exists(ResultFilePath) )
+		{
+			Result = FJson::parse(std::ifstream(ResultFilePath));
+			Result["occ"].push_back
+			({
+				{ "file", RelativeSourcePath.generic_string() },
+				{ "count", ParsedSpecifier["count"] }
+			});
+		}
+
+		else
+		{
+			Result["type"] = ParsedSpecifier["type"];
+			Result["key"] = ParsedSpecifier["key"];
+			Result["meta"] = ParsedSpecifier["meta"];
+			Result["occ"] = FJson::array
+			({
+				{
+					{"file", RelativeSourcePath.generic_string()},
+					{"count", ParsedSpecifier["count"] }
+				}
+			});
+		}
+	}
+
+	catch (...)
+	{
+		std::cout << "Something went wrong while converting parsed specifiers to results." << std::endl;
 	}
 }
 
@@ -89,18 +128,30 @@ void FSpecifierCollector::ValidateResult(const FJson& Result)
 	assert(Result["occ"].is_array() && Result["occ"].size() > 0);
 }
 
-FString FSpecifierCollector::GetResultFilename(const FJson& Result) const
+FString FSpecifierCollector::GetResultFilename(const FJson& Type, const FJson& Key) const
 {
-	return Result["type"].get<FString>() + "_" + Result["key"].get<FString>() + ".json";
+	return Type.get<FString>() + "_" + Key.get<FString>() + ".json";
 }
 
-void FSpecifierCollector::TrimResults(const char* ResultsDirectory, int Size)
+FString FSpecifierCollector::GetResultFilename(const FJson& Result) const
+{
+	return GetResultFilename(Result["type"], Result["key"]);
+}
+
+void FSpecifierCollector::SaveResult(const FJson& Result)
+{
+	std::ofstream ResultFile( FPaths::ResultsDirectory().append(GetResultFilename(Result)) );
+	ResultFile << Result.dump();
+}
+
+void FSpecifierCollector::TrimResults(int Size)
 {
 	namespace fs = std::filesystem;
+	fs::path ResultsDirectory = FPaths::ResultsDirectory();
 
 	if ( !fs::exists(ResultsDirectory) || !fs::is_directory(ResultsDirectory) )
 	{
-		throw std::runtime_error("Results directory is invalid.");
+		throw std::runtime_error("Results directory is invalid. Nothing to trim.");
 	}
 
 	for ( const fs::directory_entry& ResultPath : fs::recursive_directory_iterator(ResultsDirectory) )
@@ -111,7 +162,6 @@ void FSpecifierCollector::TrimResults(const char* ResultsDirectory, int Size)
 		}
 
 		FJson Result = FJson::parse(std::ifstream(ResultPath));
-		ValidateResult(Result);
 		TrimResult(Result, Size);
 		SaveResult(Result);
 	}
@@ -120,9 +170,9 @@ void FSpecifierCollector::TrimResults(const char* ResultsDirectory, int Size)
 void FSpecifierCollector::TrimResult(FJson& Result, int Size)
 {
 	FJson& Occurences = Result["occ"];
-	if (Occurences.size() <= Size)
+	if (Occurences.size() <= Size) // Nothing to trim
 	{
-		return; // Nothing to trim
+		return;
 	}
 
 	auto CountComparator = [](const FJson& A, const FJson& B) -> bool
@@ -131,63 +181,24 @@ void FSpecifierCollector::TrimResult(FJson& Result, int Size)
 	};
 
 	std::sort(Occurences.begin(), Occurences.end(), CountComparator);
-	auto TempVec = Occurences.get<TArray<FJson>>();
-	TempVec.resize(Size);
-	Occurences = TempVec;
+	TArray<FJson> Temp = Occurences.get<TArray<FJson>>();
+	Temp.resize(Size);
+	Occurences = Temp;
 }
 
-void FSpecifierCollector::SaveResults(const FJson& Results, const std::filesystem::path& RelativeSourcePath)
+void FSpecifierCollector::Upload()
 {
-	try
-	{
-		namespace fs = std::filesystem;
-		for (const FJson& Result : Results["items"])
-		{
-			assert(Result.contains("type") && Result.contains("key") && Result.contains("meta"));
+	FString UploadCommand = "node";
+	UploadCommand
+		.append(" ")
+		.append("F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js")
+		.append(" ")
+		.append(FPaths::ResultsDirectory().string());
 
-			fs::path SavePath = "Results";
-			SavePath /= GetResultFilename(Result);
-
-			if (fs::exists(SavePath))
-			{
-				FJson Existing = FJson::parse(std::ifstream(SavePath));
-				std::ofstream SaveFile(SavePath);
-				Existing["occ"].push_back({
-					{ "file", RelativeSourcePath.generic_string() },
-					{ "count", Result["count"] }
-					});
-				SaveFile << Existing.dump();
-			}
-
-			else
-			{
-				std::ofstream SaveFile(SavePath);
-				FJson Fresh;
-				{
-					Fresh["type"] = Result["type"];
-					Fresh["key"] = Result["key"];
-					Fresh["meta"] = Result["meta"];
-					Fresh["occ"] = FJson::array
-					({
-						{
-							{"file", RelativeSourcePath.generic_string()},
-							{"count", Result["count"] }
-						}
-						});
-				};
-				SaveFile << Fresh.dump();
-			}
-		}
-	}
-
-	catch (...)
-	{
-		std::cout << "Something went wrong while saving results." << std::endl;
-	}
+	std::system(UploadCommand.c_str());
 }
 
-void FSpecifierCollector::SaveResult(const FJson& Result)
+void FSpecifierCollector::Cleanup()
 {
-	std::ofstream ResultFile( std::filesystem::path("Results") / GetResultFilename(Result) );
-	ResultFile << Result.dump();
+	std::filesystem::remove_all(FPaths::ResultsDirectory());
 }
