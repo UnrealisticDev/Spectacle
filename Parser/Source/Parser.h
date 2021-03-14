@@ -17,7 +17,7 @@ public:
 	void IdentifyUnrealSpecifiers(TArray<FToken> InTokens);
 
 	/** Output map of specifier counts to JSON. */
-	void ToJSON(const FString& Filepath);
+	void ToJSON(const FString& OutFilepath);
 
 	/** Print debug info for specifier counts. */
 	void Dump(bool bVerbose = false);

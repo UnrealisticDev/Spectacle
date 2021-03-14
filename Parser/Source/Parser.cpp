@@ -32,10 +32,10 @@ void FParser::IdentifyUnrealSpecifiers(TArray<FToken> InTokens)
 	}
 }
 
-void FParser::ToJSON(const FString& Filepath)
+void FParser::ToJSON(const FString& OutFilepath)
 {
-	std::ofstream OutputFile(Filepath);
-	if (OutputFile.is_open())
+	std::ofstream OutFile(OutFilepath);
+	if (OutFile.is_open())
 	{
 		using FJson = nlohmann::json;
 		FJson Output;
@@ -55,7 +55,7 @@ void FParser::ToJSON(const FString& Filepath)
 			Output["items"] += Specifier;
 		}
 		
-		OutputFile << Output.dump();
+		OutFile << Output.dump();
 	}
 }
 

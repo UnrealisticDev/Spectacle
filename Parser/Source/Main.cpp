@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <stdexcept>
 #include "CoreTypes.h"
+#include "CorePath.h"
 #include "Lexer.h"
 #include "Parser.h"
 
@@ -23,11 +24,7 @@ int main(int ArgumentCount, char* Arguments[])
 		throw std::invalid_argument(FString("Source file not found: ") + SourcePath + ". Nothing to parse.");
 	}
 
-	FString OutPath = Arguments[2];
-	if ( OutPath.empty() )
-	{
-		throw std::invalid_argument(FString("Output path not specified."));
-	}
+	FPath::CreateTempDirectory();
 
 	FString SourceContent;
 	std::ifstream SourceFile(SourcePath);
@@ -51,7 +48,17 @@ int main(int ArgumentCount, char* Arguments[])
 
 	FParser Parser;
 	Parser.IdentifyUnrealSpecifiers(Tokens);
-	Parser.ToJSON(Arguments[2]);
+	Parser.ToJSON
+	(
+		FPath::TempDirectory()
+		.append
+		(
+			std::filesystem::path(Arguments[2]).has_extension() 
+			? Arguments[2] 
+			: "Parsed.json"
+		)
+		.string()
+	);
 
 	if ( Arguments[3] == "-debug" )
 	{
