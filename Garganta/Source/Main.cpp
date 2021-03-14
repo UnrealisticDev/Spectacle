@@ -1,5 +1,6 @@
 #include "Repository.h"
 #include "SpecifierCollector.h"
+#include "CorePath.h"
 
 int main(int ArgumentCount, char* Arguments[])
 {
@@ -13,13 +14,15 @@ int main(int ArgumentCount, char* Arguments[])
 	const char* StagingDirectory = "Staging";
 	const char* ResultsDirectory = "Results";
 
+	FPath::CreateTempDirectory();
+
 	//FRepository::Clone(RepoURL, Branch, Paths, StagingDirectory);
 
 	FSpecifierCollector SpecifierCollector;
 	{
 	//	SpecifierCollector.ParseSpecifiers(StagingDirectory, ResultsDirectory);
 	//	SpecifierCollector.TrimResults(ResultsDirectory, 5);
-		SpecifierCollector.Upload();
+	//	SpecifierCollector.Upload();
 	//	SpecifierCollector.Cleanup(ResultsDirectory);
 	}
 

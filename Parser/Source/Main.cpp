@@ -24,8 +24,6 @@ int main(int ArgumentCount, char* Arguments[])
 		throw std::invalid_argument(FString("Source file not found: ") + SourcePath + ". Nothing to parse.");
 	}
 
-	FPath::CreateTempDirectory();
-
 	FString SourceContent;
 	std::ifstream SourceFile(SourcePath);
 	if ( SourceFile.is_open() )
