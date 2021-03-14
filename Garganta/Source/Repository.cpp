@@ -4,12 +4,15 @@
 #include <filesystem>
 #include <stdexcept>
 #include "CoreTypes.h"
+#include "CorePath.h"
 
-bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directories, std::filesystem::path Destination)
+bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directories)
 {
+	std::filesystem::path Destination = FPaths::SourceDirectory();
+
 	if ( std::filesystem::is_directory(Destination) )
 	{
-		Cleanup(Destination);
+		Cleanup();
 	}
 
 	if ( !Branch.empty() )
@@ -72,16 +75,16 @@ bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directo
 	return true;
 }
 
-bool FRepository::Cleanup(const std::filesystem::path& Directory)
+bool FRepository::Cleanup()
 {
 	namespace fs = std::filesystem;
 	try
 	{
-		fs::remove_all(Directory);
+		fs::remove_all(FPaths::SourceDirectory());
 	}
 	catch (fs::filesystem_error e)
 	{
-		std::cerr << "Failed to clear working directory: " << e.what();
+		std::cerr << "Failed to clear source directory: " << e.what();
 		return false;
 	}
 

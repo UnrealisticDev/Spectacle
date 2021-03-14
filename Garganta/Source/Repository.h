@@ -22,8 +22,8 @@ struct FRepository
 	 * @param Destination	The working directory to clone to.
 	 * @see https://stackoverflow.com/questions/7106012/download-a-single-folder-or-directory-from-a-github-repo
 	 */
-	static bool Clone(FString RepoURL, FString Branch, TArray<FString> Directories, std::filesystem::path Destination);
+	static bool Clone(FString RepoURL, FString Branch, TArray<FString> Directories);
 
 	/** Cleans up the repository in the provided directory. */
-	static bool Cleanup(const std::filesystem::path& Directory);
+	static bool Cleanup();
 };
