@@ -43,7 +43,7 @@ void FParser::ToJSON(const FString& OutFilepath)
 			Output["items"] = {};
 
 			FJson Specifier;
-			for (std::pair<FUnrealSpecifier, int32> SpecifierCount : SpecifierCountMap)
+			for (const std::pair<FUnrealSpecifier, int32>& SpecifierCount : SpecifierCountMap)
 			{
 				Specifier.clear();
 				{
