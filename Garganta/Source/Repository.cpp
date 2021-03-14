@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include "CoreTypes.h"
 
-bool FRepository::Clone(const char* RepoURL, const char* Branch, TArray<const char*> Paths, const char* Destination)
+bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Paths, const char* Destination)
 {
 	if ( DirectoryAlreadyExists(Destination) )
 	{
@@ -14,9 +14,9 @@ bool FRepository::Clone(const char* RepoURL, const char* Branch, TArray<const ch
 
 	FString RepoRoot = RepoURL;
 
-	if ( Branch )
+	if ( !Branch.empty() )
 	{
-		RepoRoot += "/branches/";
+		RepoRoot.append() += "/branches/";
 		RepoRoot += Branch;
 		RepoRoot += "/";
 	}

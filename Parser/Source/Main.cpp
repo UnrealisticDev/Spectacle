@@ -48,7 +48,7 @@ int main(int ArgumentCount, char* Arguments[])
 	Parser.IdentifyUnrealSpecifiers(Tokens);
 	Parser.ToJSON
 	(
-		FPath::TempDirectory()
+		FPaths::TempDirectory()
 		.append
 		(
 			std::filesystem::path(Arguments[2]).has_extension() 

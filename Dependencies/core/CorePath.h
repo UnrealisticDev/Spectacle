@@ -1,11 +1,11 @@
 #include <filesystem>
 
-struct FPath
+struct FPaths
 {
     /** Returns the path to the temporary directory. */
     static std::filesystem::path TempDirectory()
     {
-        static std::filesystem::path Dir = std::filesystem::temp_directory_path().append("Spectacle\\");
+        static const std::filesystem::path Dir = std::filesystem::temp_directory_path().append("Spectacle\\");
         return Dir;
     }
 
