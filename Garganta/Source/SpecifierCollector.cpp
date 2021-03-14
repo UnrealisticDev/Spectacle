@@ -153,7 +153,7 @@ void FSpecifierCollector::SaveResults(const FJson& Results, const std::filesyste
 				FJson Existing = FJson::parse(std::ifstream(SavePath));
 				std::ofstream SaveFile(SavePath);
 				Existing["occ"].push_back({
-					{ "file", RelativeSourcePath.string() },
+					{ "file", RelativeSourcePath.generic_string() },
 					{ "count", Result["count"] }
 					});
 				SaveFile << Existing.dump();
@@ -170,7 +170,7 @@ void FSpecifierCollector::SaveResults(const FJson& Results, const std::filesyste
 					Fresh["occ"] = FJson::array
 					({
 						{
-							{"file", RelativeSourcePath.string()},
+							{"file", RelativeSourcePath.generic_string()},
 							{"count", Result["count"] }
 						}
 						});
