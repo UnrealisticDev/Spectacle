@@ -88,7 +88,7 @@ void FSpecifierCollector::ConvertParsedSpecifierToResult(const FJson& ParsedSpec
 		Result.clear();
 
 		namespace fs = std::filesystem;
-		fs::path ResultFilePath = FPaths::TempDirectory().append(GetResultFilename(ParsedSpecifier["type"], ParsedSpecifier["key"]));
+		fs::path ResultFilePath = FPaths::ResultsDirectory().append(GetResultFilename(ParsedSpecifier["type"], ParsedSpecifier["key"]));
 		if ( fs::exists(ResultFilePath) )
 		{
 			Result = FJson::parse(std::ifstream(ResultFilePath));

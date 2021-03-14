@@ -26,8 +26,11 @@ private:
 
 private:
 
-	/** ... */
+	/** Ensures that parsed specifier has valid type, key, meta, and count values. */
 	void ValidateParsedSpecifier(const FJson& ParsedSpecifier);
+
+	/** Converts parsed specifier to result. */
+	void ConvertParsedSpecifierToResult(const FJson& ParsedSpecifier, const std::filesystem::path& RelativeSourcePath, FJson& Result);
 
 	/** 
 	 * Ensures that a result has valid type, key, and meta values
@@ -42,6 +45,9 @@ private:
 	FString GetResultFilename(const FJson& Type, const FJson& Key) const;
 	FString GetResultFilename(const FJson& Result) const;
 
+	/** Saves a result to file. */
+	void SaveResult(const FJson& Result);
+
 public:
 
 	/** 
@@ -54,12 +60,6 @@ private:
 
 	/** Trims result down to desired size. */
 	void TrimResult(FJson& Result, int Size);
-
-	/** Converts parsed specifier to result. */
-	void ConvertParsedSpecifierToResult(const FJson& ParsedSpecifier, const std::filesystem::path& RelativeSourcePath, FJson& Result);
-
-	/** Saves a result to file. */
-	void SaveResult(const FJson& Result);
 
 public:
 

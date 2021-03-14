@@ -24,8 +24,8 @@ int main(int ArgumentCount, char* Arguments[])
 	{
 		SpecifierCollector.ParseSpecifiers();
 		SpecifierCollector.TrimResults(5);
-	//	SpecifierCollector.Upload();
+		SpecifierCollector.Upload();
 	}
 
-	std::filesystem::remove_all(FPaths::TempDirectory());
+	//std::filesystem::remove_all(FPaths::TempDirectory());
 }
