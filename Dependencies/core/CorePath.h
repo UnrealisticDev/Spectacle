@@ -5,8 +5,7 @@ struct FPath
     /** Returns the path to the temporary directory. */
     static std::filesystem::path TempDirectory()
     {
-        std::filesystem::path Dir = std::filesystem::temp_directory_path();
-        Dir += +"Spectacle\\";
+        static std::filesystem::path Dir = std::filesystem::temp_directory_path().append("Spectacle\\");
         return Dir;
     }
 
