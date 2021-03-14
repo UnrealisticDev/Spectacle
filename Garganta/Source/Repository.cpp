@@ -5,83 +5,85 @@
 #include <stdexcept>
 #include "CoreTypes.h"
 
-bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Paths, const char* Destination)
+bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directories, std::filesystem::path Destination)
 {
-	if ( DirectoryAlreadyExists(Destination) )
+	if ( std::filesystem::is_directory(Destination) )
 	{
 		Cleanup(Destination);
 	}
 
-	FString RepoRoot = RepoURL;
-
 	if ( !Branch.empty() )
 	{
-		RepoRoot.append() += "/branches/";
-		RepoRoot += Branch;
-		RepoRoot += "/";
+		RepoURL
+			.append("/branches/")
+			.append(Branch)
+			.append("/");
 	}
 
 	else
 	{
-		RepoRoot += "/trunk/"; // In SVN, refers to main branch
+		RepoURL.append("/trunk/"); // In SVN, refers to main branch
 	}
 
-	bool bRepoNotFound = std::system(("svn ls " + RepoRoot).c_str());
+	bool bRepoNotFound = std::system(("svn ls > nul " + RepoURL).c_str());
 	if ( bRepoNotFound )
 	{
-		throw std::invalid_argument("Repository does not exist: " + RepoRoot);
+		throw std::invalid_argument("Repository does not exist: " + RepoURL);
 	}
 
-	if ( Paths.size() > 0 )
+	if ( Directories.size() > 0 )
 	{
-		for (const char* SubPath : Paths)
+		for (const FString& Directory : Directories)
 		{
-			FString FullPath = RepoRoot + SubPath;
-			std::cout << "Exporting: " + FullPath << std::endl;
-			FString ExportCommand = "svn";
-			{
-				ExportCommand += " export";
-				ExportCommand += " " + FullPath + " ";
-				ExportCommand += Destination;
-				ExportCommand += "/";
-				ExportCommand += SubPath;
-			}
+			std::cout << "Exporting: " + RepoURL + Directory << std::endl;
+
+			FString ExportCommand = "svn export";
+			ExportCommand
+				.append(" ")
+				.append
+				(
+					RepoURL
+					.append(Directory)
+				)
+				.append(" ")
+				.append
+				(
+					Destination
+					.append(Directory)
+					.string()
+				);
+
 			std::system(ExportCommand.c_str());
 		}
 	}
 
 	else
 	{
-		FString ExportCommand = "svn";
-		{
-			ExportCommand += " export";
-			ExportCommand += " " + RepoRoot + " ";
-			ExportCommand += Destination;
-		}
+		FString ExportCommand = "svn export";
+		ExportCommand
+			.append(" ")
+			.append(RepoURL)
+			.append(" ")
+			.append(Destination.string());
+
 		std::system(ExportCommand.c_str());
 	}
 
 	return true;
 }
 
-bool FRepository::Cleanup(const char* Directory)
+bool FRepository::Cleanup(const std::filesystem::path& Directory)
 {
 	namespace fs = std::filesystem;
 	try
 	{
 		fs::remove_all(Directory);
 	}
-	catch (fs::filesystem_error E)
+	catch (fs::filesystem_error e)
 	{
-		std::cerr << "Failed to clear working directory: " << E.what();
+		std::cerr << "Failed to clear working directory: " << e.what();
 		return false;
 	}
 
 	return true;
-}
-
-bool FRepository::DirectoryAlreadyExists(const char* Directory)
-{
-	namespace fs = std::filesystem;
-	return fs::exists(Directory) && fs::is_directory(Directory);
 }

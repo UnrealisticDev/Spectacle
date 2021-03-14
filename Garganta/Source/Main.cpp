@@ -1,31 +1,29 @@
-#include <filesystem>
 #include "Repository.h"
 #include "SpecifierCollector.h"
 #include "CoreTypes.h"
 #include "CorePath.h"
+#include "iostream"
 
 int main(int ArgumentCount, char* Arguments[])
 {
-	namespace fs = std::filesystem;
-
 	FString RepoURL = "https://github.com/EpicGames/UnrealEngine";
 	FString Branch = Arguments[1];
-	TArray<FString> Paths = {
-		"Engine/Source/Runtime",
-		"Engine/Source/Editor",
-		"Engine/Source/Developer"
+	TArray<FString> Directories = 
+	{
+		//"Engine/Source/Runtime",
+		//"Engine/Source/Editor",
+		"Engine/Source/Runtime/AugmentedReality/Public"
 	};
-	FString SourceDirectory = "/Source";
-	FString ResultsDirectory = "/Results";
 
 	FPaths::CreateTempDirectory();
 
 	FRepository::Clone
 	(
-		RepoURL, Branch, Paths, 
-		FPaths::TempDirectory().append(SourceDirectory));
+		RepoURL, Branch, Directories, 
+		FPaths::SourceDirectory()
+	);
 
-	FSpecifierCollector SpecifierCollector;
+	//FSpecifierCollector SpecifierCollector;
 	{
 	//	SpecifierCollector.ParseSpecifiers(StagingDirectory, ResultsDirectory);
 	//	SpecifierCollector.TrimResults(ResultsDirectory, 5);
@@ -33,5 +31,8 @@ int main(int ArgumentCount, char* Arguments[])
 	//	SpecifierCollector.Cleanup(ResultsDirectory);
 	}
 
-	//FRepository::Cleanup(StagingDirectory);
+	FRepository::Cleanup
+	(
+		FPaths::SourceDirectory()
+	);
 }
