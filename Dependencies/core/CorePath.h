@@ -2,39 +2,35 @@
 
 #include <filesystem>
 
-namespace FPaths
+struct FPaths
 {
-	namespace fs = std::filesystem;
-	using path = fs::path;
-
     /** Creates the temporary directory if it does not exist. */
-    path TempDirectory();
-    void CreateTempDirectory()
+    static void CreateTempDirectory()
     {
-        if (!fs::exists(FPaths::TempDirectory()))
+        if (!std::filesystem::exists(FPaths::TempDirectory()))
         {
-            fs::create_directory(TempDirectory());
+            std::filesystem::create_directory(TempDirectory());
         }
     }
 
     /** Returns the path to the temporary directory. */
-    path TempDirectory()
+    static std::filesystem::path TempDirectory()
     {
-        static const path Dir = fs::temp_directory_path().append("Spectacle\\");
+        static const std::filesystem::path Dir = std::filesystem::temp_directory_path().append("Spectacle\\");
         return Dir;
     }
 
     /** Returns the path to the source directory. */
-    path SourceDirectory()
+    static std::filesystem::path SourceDirectory()
     {
-        static const path Dir = TempDirectory().append("Source\\");
+        static const std::filesystem::path Dir = TempDirectory().append("Source\\");
         return Dir;
     }
 
     /** Returns the path to the results directory. */
-    path ResultsDirectory()
+    static std::filesystem::path ResultsDirectory()
     {
-        static const path Dir = TempDirectory().append("Results\\");
+        static const std::filesystem::path Dir = TempDirectory().append("Results\\");
         return Dir;
     }
 };
