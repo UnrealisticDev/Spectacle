@@ -13,7 +13,7 @@
  * occurrence counts.
  * 
  * @param 1 - Filepath of the source file to be parsed.
- * @param 2 - (Optional) Filepath of file to output results to. 
+ * @param 2 - (Optional) Filename + extension of file to output results to. Default: "Parsed.json"
  * @param 3 - (Optional) -debug = Prints output to console.
  */
 int main(int ArgumentCount, char* Arguments[])
