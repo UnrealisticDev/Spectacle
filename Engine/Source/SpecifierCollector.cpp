@@ -191,7 +191,7 @@ void FSpecifierCollector::Upload()
 	FString UploadCommand = "node";
 	UploadCommand
 		.append(" ")
-		.append("F:/Projects/Unrealistic/Spectacle/Broadcaster/app.js")
+		.append("upload.js")
 		.append(" ")
 		.append(FPaths::ResultsDirectory().string());
 

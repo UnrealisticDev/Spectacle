@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Parse", "Parse\Parse.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{38D92EDF-B494-44AC-9591-813F8AC8378F}"
 EndProject
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Broadcaster", "Broadcaster\Broadcaster.njsproj", "{F3D239B0-DC28-41A9-9C5C-EC7795C9D54A}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Upload", "Upload\Upload.njsproj", "{F3D239B0-DC28-41A9-9C5C-EC7795C9D54A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
