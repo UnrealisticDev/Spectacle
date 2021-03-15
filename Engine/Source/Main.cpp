@@ -8,7 +8,7 @@
 int main(int ArgumentCount, char* Arguments[])
 {
 	FString RepoURL = "https://github.com/EpicGames/UnrealEngine";
-	FString Branch = Arguments[1];
+	FString Branch = ArgumentCount > 1 ? Arguments[1] : "";
 	TArray<FString> Directories = 
 	{
 		//"Engine/Source/Runtime",
