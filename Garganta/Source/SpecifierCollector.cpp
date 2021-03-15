@@ -33,7 +33,7 @@ void FSpecifierCollector::ParseSpecifiers()
 
 			try
 			{
-				FString ParseCommand = "Parser";
+				FString ParseCommand = "Parse";
 				ParseCommand
 					.append(" ")
 					.append(SourcePath.path().string())
