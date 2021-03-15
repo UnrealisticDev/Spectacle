@@ -31,9 +31,9 @@ void FSpecifierCollector::ParseSpecifiers()
 			const fs::path RelativeSourcePath = SourcePath.path().lexically_relative(SourceDirectory);
 			std::cout << "Parsing: " << RelativeSourcePath.string() << std::endl;
 
-			try 
+			try
 			{
-				FString ParseCommand = "F:/Projects/Unrealistic/Spectacle/x64/Debug/Parser.exe";
+				FString ParseCommand = "Parser";
 				ParseCommand
 					.append(" ")
 					.append(SourcePath.path().string())
