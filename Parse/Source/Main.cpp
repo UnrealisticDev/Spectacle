@@ -18,7 +18,7 @@
  */
 int main(int ArgumentCount, char* Arguments[])
 {
-	FString SourcePath = Arguments[1];
+	FString SourcePath = ArgumentCount > 1 ? Arguments[1] : "";
 	if ( !std::filesystem::exists(SourcePath) )
 	{
 		throw std::invalid_argument(FString("Source file not found: ") + SourcePath + ". Nothing to parse.");
@@ -51,14 +51,14 @@ int main(int ArgumentCount, char* Arguments[])
 		FPaths::TempDirectory()
 		.append
 		(
-			std::filesystem::path(Arguments[2]).has_extension() 
+			ArgumentCount > 2 && std::filesystem::path(Arguments[2]).has_extension() 
 			? Arguments[2] 
 			: "Parsed.json"
 		)
 		.string()
 	);
 
-	if ( Arguments[3] == "-debug" )
+	if ( ArgumentCount > 3 && Arguments[3] == "-debug" )
 	{
 		Parser.Dump(false);
 	}
