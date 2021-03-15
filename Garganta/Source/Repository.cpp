@@ -1,5 +1,4 @@
 #include "Repository.h"
-#include "git2.h"
 #include <iostream>
 #include <filesystem>
 #include <stdexcept>
