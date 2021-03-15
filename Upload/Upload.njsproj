@@ -29,6 +29,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="gulpfile.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="upload.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />

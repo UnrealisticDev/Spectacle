@@ -188,10 +188,8 @@ void FSpecifierCollector::TrimResult(FJson& Result, int Size)
 
 void FSpecifierCollector::Upload()
 {
-	FString UploadCommand = "node";
+	FString UploadCommand = "upload";
 	UploadCommand
-		.append(" ")
-		.append("upload.js")
 		.append(" ")
 		.append(FPaths::ResultsDirectory().string());
 
