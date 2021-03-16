@@ -186,12 +186,24 @@ void FSpecifierCollector::TrimResult(FJson& Result, int Size)
 	Occurences = Temp;
 }
 
-void FSpecifierCollector::Upload()
+void FSpecifierCollector::Upload(FString Branch)
 {
+	if (Branch.starts_with("4."))
+	{
+		int32 DelimPos = (int32)Branch.find('.');
+		Branch = Branch.substr
+		(
+			DelimPos + 1,
+			Branch.length() - DelimPos
+		);
+	}
+
 	FString UploadCommand = "upload";
 	UploadCommand
 		.append(" ")
-		.append(FPaths::ResultsDirectory().string());
+		.append(FPaths::ResultsDirectory().string())
+		.append(" ")
+		.append(Branch);
 
 	std::system(UploadCommand.c_str());
 }

@@ -64,5 +64,5 @@ private:
 public:
 
 	/** Upload specifier stats to server. */
-	void Upload();
+	void Upload(FString Branch);
 };
