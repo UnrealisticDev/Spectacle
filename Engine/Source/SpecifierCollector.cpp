@@ -188,7 +188,7 @@ void FSpecifierCollector::TrimResult(FJson& Result, int Size)
 
 void FSpecifierCollector::Upload(FString Branch)
 {
-	if (Branch.starts_with("4."))
+	if (Branch.rfind("4.", 0) == 0)
 	{
 		int32 DelimPos = (int32)Branch.find('.');
 		Branch = Branch.substr
