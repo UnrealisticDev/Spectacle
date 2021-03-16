@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <chrono>
 #include <thread>
+
+#include <Windows.h>
+
 #include "CoreTypes.h"
 #include "json.hpp"
 
@@ -97,6 +100,8 @@ int main()
 	std::ofstream out("Log.txt");
 	std::streambuf* coutbuf = std::cout.rdbuf();
 	std::cout.rdbuf(out.rdbuf());
+
+	::ShowWindow(::GetConsoleWindow(), SW_HIDE); // Hide console and redirect output to file
 
 	TArray<FJson> ParsedVersions = LoadParsedVersions();
 	uint8 LatestUnparsedVersion = 0;
