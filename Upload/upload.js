@@ -51,7 +51,7 @@ const loadParsedResult = async (file) => {
 /**
  * Creates a specifier entry that conforms to the Contentful API from a result.
  */
-const createSpecifierFromParsedResult = (result) => {
+const createSpecifierFromParsedResult = (result, version) => {
 	const { type, key, meta, occ } = result;
 	return {
 		fields: {
@@ -62,7 +62,7 @@ const createSpecifierFromParsedResult = (result) => {
 				'en-US': {
 					versions: [
 						{
-							version: 'release',
+							version: version,
 							items: occ,
 						},
 					],
@@ -227,7 +227,8 @@ const pushEntryDeltas = async (client, deltas) => {
 		for (const file of files) {
 			console.log(file);
 			const parsedSpecifier = createSpecifierFromParsedResult(
-				await loadParsedResult(path.resolve(parsedResultDirectory, file))
+				await loadParsedResult(path.resolve(parsedResultDirectory, file)),
+				process.argv[3] ? process.argv[3] : "release"
 			);
 			console.log(parsedSpecifier);
 			const delta = calculateSpecifierDelta(
