@@ -24,12 +24,13 @@ void FSpecifierCollector::ParseSpecifiers()
 		fs::create_directory(ResultsDirectory);
 	}
 
+	std::cout << "Parsing..." << std::endl;
+
 	for (const fs::directory_entry& SourcePath : fs::recursive_directory_iterator(SourceDirectory))
 	{
 		if ( !SourcePath.is_directory() && SourcePath.path().extension() == ".h" )
 		{
 			const fs::path RelativeSourcePath = SourcePath.path().lexically_relative(SourceDirectory);
-			std::cout << "Parsing: " << RelativeSourcePath.string() << std::endl;
 
 			try
 			{
@@ -45,7 +46,7 @@ void FSpecifierCollector::ParseSpecifiers()
 
 			catch (...) 
 			{
-				std::cout << "\tSomething went wrong in parsing source..." << std::endl;
+				std::cout << "--> Something went wrong in parsing source: " << RelativeSourcePath.string() << std::endl;
 				continue;
 			}
 
@@ -57,7 +58,7 @@ void FSpecifierCollector::ParseSpecifiers()
 			
 			catch (...)
 			{
-				std::cout << "\tSomething went wrong in parsing output..." << std::endl;
+				std::cout << "--> Something went wrong in parsing output: " << RelativeSourcePath.string() << std::endl;
 				continue;
 			}
 
@@ -116,7 +117,7 @@ void FSpecifierCollector::ConvertParsedSpecifierToResult(const FJson& ParsedSpec
 
 	catch (...)
 	{
-		std::cout << "Something went wrong while converting parsed specifiers to results." << std::endl;
+		std::cout << "--> Something went wrong while converting parsed specifiers to results." << std::endl;
 	}
 }
 
