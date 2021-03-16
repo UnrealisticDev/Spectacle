@@ -1,7 +1,7 @@
 'use strict';
 const env = require('dotenv');
 const fs = require('fs');
-const util = require('util');
+const path = require('path');
 const contentful = require('contentful-management');
 
 env.config();
@@ -22,20 +22,7 @@ const getContentfulClient = () => {
 };
 
 /**
- * Loads parsed specifiers from dataset passed to us from Garganta.
- */
-const loadParsedSpecifiers = async (filepath) => {
-	const readFile = util.promisify(fs.readFile);
-	try {
-		return JSON.parse(await readFile(filepath));
-	} catch (error) {
-		return console.log('Failed to open or parse dataset file: ' + error);
-	}
-};
-
-/**
- * Fetches existing specifiers using the Contentful API.
- * @returns existing specifiers
+ * Fetches existing specifier entries from Contentful.
  */
 const fetchExistingSpecifiers = async (client) => {
 	try {
@@ -46,7 +33,79 @@ const fetchExistingSpecifiers = async (client) => {
 		});
 		return specifiers;
 	} catch (error) {
-		console.error(error);
+		console.error('Failed to fetch existing specifiers: ' + error);
+	}
+};
+
+/**
+ * Loads parsed result from file.
+ */
+const loadParsedResult = async (file) => {
+	try {
+		return JSON.parse(await fs.promises.readFile(file));
+	} catch (error) {
+		return console.log('Failed to open or parse result file: ' + error);
+	}
+};
+
+/**
+ * Creates a specifier entry that conforms to the Contentful API from a result.
+ */
+const createSpecifierFromParsedResult = (result) => {
+	const { type, key, meta, occ } = result;
+	return {
+		fields: {
+			type: { 'en-US': type },
+			key: { 'en-US': key },
+			meta: { 'en-US': meta },
+			occ: {
+				'en-US': {
+					versions: [
+						{
+							version: 'release',
+							items: occ,
+						},
+					],
+				},
+			},
+		},
+	};
+};
+
+/**
+ * Calculates the delta a parsed specifier and a set of existing specifiers.
+ */
+const calculateSpecifierDelta = (parsedSpecifier, existingSpecifiers) => {
+	const existingSpecifier = existingSpecifiers.items.find(
+		(existingSpecifier) => {
+			return (
+				parsedSpecifier.fields.type['en-US'] ===
+					existingSpecifier.fields.type['en-US'] &&
+				parsedSpecifier.fields.key['en-US'] ===
+					existingSpecifier.fields.key['en-US']
+			);
+		}
+	);
+
+	if (existingSpecifier) {
+		const { occ } = existingSpecifier.fields;
+		if (!occ['en-US'].versions.some(({ version }) => version == 'release')) {
+			var updatedSpecifier = existingSpecifier;
+			updatedSpecifier.fields.occ['en-US'].versions.push(
+				parsedSpecifier.fields.occ['en-US'].versions[0]
+			);
+			return {
+				type: 'update',
+				entry: updatedSpecifier,
+			};
+		} else {
+			return null;
+		}
+	} else {
+		return {
+			type: 'create',
+			entry: parsedSpecifier,
+		};
 	}
 };
 
@@ -116,31 +175,26 @@ function timeout(ms) {
  * Pushes deltas to the Contentful database.
  * @param deltas
  */
-const pushDeltas = async (client, deltas) => {
-	for (const create of deltas.create) {
+const pushEntryDeltas = async (client, deltas) => {
+	for (const delta of deltas) {
 		client
 			.getSpace(process.env.CONTENTFUL_SPACE_ID)
 			.then((space) => space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT))
-			.then((environment) =>
-				environment.createEntry(process.env.CONTENTFUL_TYPE, create)
-			);
+			.then((environment) => {
+				if (delta.type == 'create') {
+					environment.createEntry(process.env.CONTENTFUL_TYPE, delta.entry);
+				} else if (delta.type == 'update') {
+					delta.entry.update();
+				}
+			});
 		await timeout(1000);
 	}
 };
 
-(async () => {
+(async function () {
 	try {
 		const client = getContentfulClient();
 		console.log('Opened client.');
-
-        const parsedFilepath = process.argv[2];
-		const parsedSpecifiers = await loadParsedSpecifiers(parsedFilepath);
-		if (!parsedSpecifiers) {
-			console.error('No parsed entries retrieved.');
-			return;
-		}
-
-		console.log('Loaded %d parsed specifiers.', parsedSpecifiers.items.length);
 
 		const existingSpecifiers = await fetchExistingSpecifiers(client);
 		if (!existingSpecifiers) {
@@ -152,24 +206,57 @@ const pushDeltas = async (client, deltas) => {
 			'Loaded %d existing specifiers.',
 			existingSpecifiers.items.length
 		);
+		existingSpecifiers.items.forEach((i) => {
+			console.log(require('util').inspect(i, false, 8));
+		});
 
-		const deltas = calculateSpecifierDeltas(
-			existingSpecifiers,
-			parsedSpecifiers
-		);
+		const parsedResultDirectory = process.argv[2]
+			? process.argv[2]
+			: 'C:\\Users\\Mustafa\\AppData\\Local\\Temp\\Spectacle\\Results\\';
+		if (!(await fs.promises.stat(parsedResultDirectory)).isDirectory()) {
+			console.error('Provided result directory does not exist.');
+		}
 
-		if (deltas.create.length === 0 && deltas.update.length === 0) {
+		const files = await fs.promises.readdir(parsedResultDirectory);
+		if (files.length === 0) {
+			console.error('No results to parse in result directory.');
+			return;
+		}
+
+		const deltas = [];
+		for (const file of files) {
+			console.log(file);
+			const parsedSpecifier = createSpecifierFromParsedResult(
+				await loadParsedResult(path.resolve(parsedResultDirectory, file))
+			);
+			console.log(parsedSpecifier);
+			const delta = calculateSpecifierDelta(
+				parsedSpecifier,
+				existingSpecifiers
+			);
+			if (delta) {
+				deltas.push(delta);
+			}
+		}
+
+		if (deltas.length === 0) {
 			console.log('No delta between parsed and existing specifiers.');
 			return;
 		}
 
-		console.log(
-			'Identified %d new entries and %d entries to be updated.',
-			deltas.create.length,
-			deltas.update.length
-		);
+		var create = 0;
+		var update = 0;
+		deltas.forEach((d) => {
+			if (d.type === 'create') {
+				++create;
+			} else{
+				++update;
+			}
+		});
+		console.log('Identified %d new entries.', create);
+		console.log('Identified %d update entries.', update);
 
-		await pushDeltas(client, deltas);
+		await pushEntryDeltas(client, deltas);
 	} catch (error) {
 		console.error(error);
 	}
