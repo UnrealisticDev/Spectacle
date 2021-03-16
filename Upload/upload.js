@@ -94,7 +94,7 @@ const calculateSpecifierDelta = (
 
 	if (existingSpecifier) {
 		const { occ } = existingSpecifier.fields;
-		if (!occ['en-US'].versions.some(({ v }) => v === version)) {
+		if (!occ['en-US'].versions.some(({ version: exVersion }) => exVersion === version)) {
 			var updatedSpecifier = existingSpecifier;
 			updatedSpecifier.fields.occ['en-US'].versions.push(
 				parsedSpecifier.fields.occ['en-US'].versions[0]
