@@ -76,7 +76,11 @@ const createSpecifierFromParsedResult = (result, version) => {
  * Calculates the delta between a parsed specifier and a
  * set of existing specifiers.
  */
-const calculateSpecifierDelta = (parsedSpecifier, existingSpecifiers) => {
+const calculateSpecifierDelta = (
+	parsedSpecifier,
+	existingSpecifiers,
+	version
+) => {
 	const existingSpecifier = existingSpecifiers.items.find(
 		(existingSpecifier) => {
 			return (
@@ -90,7 +94,7 @@ const calculateSpecifierDelta = (parsedSpecifier, existingSpecifiers) => {
 
 	if (existingSpecifier) {
 		const { occ } = existingSpecifier.fields;
-		if (!occ['en-US'].versions.some(({ version }) => version == 'release')) {
+		if (!occ['en-US'].versions.some(({ v }) => v === version)) {
 			var updatedSpecifier = existingSpecifier;
 			updatedSpecifier.fields.occ['en-US'].versions.push(
 				parsedSpecifier.fields.occ['en-US'].versions[0]
@@ -145,12 +149,12 @@ const pushEntryDeltas = async (client, deltas) => {
 		if (!existingSpecifiers) {
 			console.error('No existing entries retrieved.');
 			return;
+		} else {
+			console.log(
+				'Loaded %d existing specifiers.',
+				existingSpecifiers.items.length
+			);
 		}
-
-		console.log(
-			'Loaded %d existing specifiers.',
-			existingSpecifiers.items.length
-		);
 
 		const parsedResultDirectory = process.argv[2]
 			? process.argv[2]
@@ -159,23 +163,27 @@ const pushEntryDeltas = async (client, deltas) => {
 			console.error('Provided result directory does not exist.');
 		}
 
-		const files = await fs.promises.readdir(parsedResultDirectory);
-		if (files.length === 0) {
+		const results = await fs.promises.readdir(parsedResultDirectory);
+		if (results.length === 0) {
 			console.error('No results to parse in result directory.');
 			return;
+		} else {
+			console.log('Found %d parsed results.', results.length);
 		}
 
 		const deltas = [];
-		for (const file of files) {
-			console.log(file);
+		const version = process.argv[3] ? parseInt(process.argv[3]) : -1;
+		console.log(`Applies to version ${process.argv[3]}.`);
+
+		for (const file of results) {
 			const parsedSpecifier = createSpecifierFromParsedResult(
 				await loadParsedResult(path.resolve(parsedResultDirectory, file)),
-				process.argv[3] ? process.argv[3] : 'release'
+				version
 			);
-			console.log(parsedSpecifier);
 			const delta = calculateSpecifierDelta(
 				parsedSpecifier,
-				existingSpecifiers
+				existingSpecifiers,
+				version
 			);
 			if (delta) {
 				deltas.push(delta);
@@ -185,21 +193,24 @@ const pushEntryDeltas = async (client, deltas) => {
 		if (deltas.length === 0) {
 			console.log('No delta between parsed and existing specifiers.');
 			return;
+		} else {
+			var create = 0;
+			var update = 0;
+			deltas.forEach((d) => {
+				if (d.type === 'create') {
+					++create;
+				} else {
+					++update;
+				}
+			});
+			console.log('Identified %d new entries.', create);
+			console.log('Identified %d update entries.', update);
 		}
 
-		var create = 0;
-		var update = 0;
-		deltas.forEach((d) => {
-			if (d.type === 'create') {
-				++create;
-			} else {
-				++update;
-			}
-		});
-		console.log('Identified %d new entries.', create);
-		console.log('Identified %d update entries.', update);
-
+		console.log('Pushing deltas to server.');
 		await pushEntryDeltas(client, deltas);
+
+		console.log('Upload successful.');
 	} catch (error) {
 		console.error(error);
 	}
