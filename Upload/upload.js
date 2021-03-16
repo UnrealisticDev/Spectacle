@@ -73,7 +73,8 @@ const createSpecifierFromParsedResult = (result, version) => {
 };
 
 /**
- * Calculates the delta a parsed specifier and a set of existing specifiers.
+ * Calculates the delta between a parsed specifier and a
+ * set of existing specifiers.
  */
 const calculateSpecifierDelta = (parsedSpecifier, existingSpecifiers) => {
 	const existingSpecifier = existingSpecifiers.items.find(
@@ -110,61 +111,6 @@ const calculateSpecifierDelta = (parsedSpecifier, existingSpecifiers) => {
 };
 
 /**
- * Creates a new entry that conforms to the Contentful API.
- */
-const createEntry = (parsed) => {
-	const { type, key, meta } = parsed;
-	return {
-		fields: {
-			type: { 'en-US': type },
-			key: { 'en-US': key },
-			meta: { 'en-US': meta },
-		},
-	};
-};
-
-/**
- * Updates an existing entry in accordane with the Contentful API.
- */
-const updateEntry = (existing, parsed) => {
-	return {
-		needsUpdate: false,
-		update: null,
-	};
-};
-
-/**
- * Compares existing and parsed specifiers and
- * determines what needs to be created/updated.
- * @param existingSpecifiers
- * @param parsedSpecifiers
- */
-const calculateSpecifierDeltas = (existingSpecifiers, parsedSpecifiers) => {
-	var deltas = {
-		create: [],
-		update: [],
-	};
-
-	for (const parsed of parsedSpecifiers.items) {
-		const existing = existingSpecifiers.items.find((existing) => {
-			const { type, key } = existing.fields;
-			return parsed.type === type['en-US'] && parsed.key === key['en-US'];
-		});
-
-		if (!existing) {
-			deltas.create.push(createEntry(parsed));
-		} else {
-			const { needsUpdate, update } = updateEntry(null, parsed);
-			if (needsUpdate) {
-				deltas.update.push(update);
-			}
-		}
-	}
-
-	return deltas;
-};
-
-/**
  * Simple timeout function used to space out API calls.
  */
 function timeout(ms) {
@@ -173,7 +119,6 @@ function timeout(ms) {
 
 /**
  * Pushes deltas to the Contentful database.
- * @param deltas
  */
 const pushEntryDeltas = async (client, deltas) => {
 	for (const delta of deltas) {
@@ -206,9 +151,6 @@ const pushEntryDeltas = async (client, deltas) => {
 			'Loaded %d existing specifiers.',
 			existingSpecifiers.items.length
 		);
-		existingSpecifiers.items.forEach((i) => {
-			console.log(require('util').inspect(i, false, 8));
-		});
 
 		const parsedResultDirectory = process.argv[2]
 			? process.argv[2]
@@ -228,7 +170,7 @@ const pushEntryDeltas = async (client, deltas) => {
 			console.log(file);
 			const parsedSpecifier = createSpecifierFromParsedResult(
 				await loadParsedResult(path.resolve(parsedResultDirectory, file)),
-				process.argv[3] ? process.argv[3] : "release"
+				process.argv[3] ? process.argv[3] : 'release'
 			);
 			console.log(parsedSpecifier);
 			const delta = calculateSpecifierDelta(
@@ -250,7 +192,7 @@ const pushEntryDeltas = async (client, deltas) => {
 		deltas.forEach((d) => {
 			if (d.type === 'create') {
 				++create;
-			} else{
+			} else {
 				++update;
 			}
 		});
