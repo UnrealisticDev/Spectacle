@@ -13,6 +13,11 @@ struct FPaths
         }
     }
 
+    static void CleanupTempDirectory()
+    {
+        std::filesystem::remove_all(TempDirectory());
+    }
+
     /** Returns the path to the temporary directory. */
     static std::filesystem::path TempDirectory()
     {
