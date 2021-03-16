@@ -30,6 +30,7 @@ const fetchExistingSpecifiers = async (client) => {
 		const environment = await space.getEnvironment(CONTENTFUL_ENVIRONMENT);
 		const specifiers = await environment.getEntries({
 			content_type: CONTENTFUL_TYPE,
+			limit: 1000
 		});
 		return specifiers;
 	} catch (error) {
