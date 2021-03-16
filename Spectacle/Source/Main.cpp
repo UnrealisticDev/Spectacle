@@ -83,7 +83,7 @@ void ParseVersion(uint8 Version)
 
 void SaveParsedVersions(const TArray<FJson>& ParsedVersions)
 {
-	if (ParsedVersions.size() > 0)
+	if ( !ParsedVersions.empty() )
 	{
 		std::ofstream HistoryFile(HistoryFilePath);
 		FJson History;
