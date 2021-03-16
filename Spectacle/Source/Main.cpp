@@ -123,7 +123,7 @@ int main()
 		}
 
 		std::cout << "Parsing: " << std::to_string(Version) << std::endl;
-		//ParseVersion(Version);
+		ParseVersion(Version);
 
 		ParsedVersions.push_back(Version);
 	}
