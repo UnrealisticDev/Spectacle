@@ -78,7 +78,7 @@ void ParseVersion(uint8 Version)
 		.append(" ")
 		.append(sVersion);
 
-	std::system(ParseCommand);
+	std::system(ParseCommand.c_str());
 }
 
 void SaveParsedVersions(const TArray<FJson>& ParsedVersions)
@@ -94,6 +94,10 @@ void SaveParsedVersions(const TArray<FJson>& ParsedVersions)
 
 int main()
 {
+	std::ofstream out("Log.txt");
+	std::streambuf* coutbuf = std::cout.rdbuf();
+	std::cout.rdbuf(out.rdbuf());
+
 	TArray<FJson> ParsedVersions = LoadParsedVersions();
 	uint8 LatestUnparsedVersion = 0;
 	std::cout << "Loaded parsed versions." << std::endl;
@@ -114,7 +118,7 @@ int main()
 		}
 
 		std::cout << "Parsing: " << std::to_string(Version) << std::endl;
-		ParseVersion(Version);
+		//ParseVersion(Version);
 
 		ParsedVersions.push_back(Version);
 	}
