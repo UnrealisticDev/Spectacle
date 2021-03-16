@@ -11,9 +11,9 @@ int main(int ArgumentCount, char* Arguments[])
 	FString Branch = ArgumentCount > 1 ? Arguments[1] : "";
 	TArray<FString> Directories = 
 	{
-		//"Engine/Source/Runtime",
-		//"Engine/Source/Editor",
-		"Engine/Source/Runtime/AugmentedReality/Public"
+		"Engine/Source/Runtime",
+		"Engine/Source/Editor",
+		"Engine/Source/Developer"
 	};
 
 	FPaths::CreateTempDirectory();
@@ -24,8 +24,8 @@ int main(int ArgumentCount, char* Arguments[])
 	{
 		SpecifierCollector.ParseSpecifiers();
 		SpecifierCollector.TrimResults(5);
-		SpecifierCollector.Upload();
+		SpecifierCollector.Upload(Branch);
 	}
 
-	//std::filesystem::remove_all(FPaths::TempDirectory());
+	FPaths::CleanupTempDirectory();
 }
