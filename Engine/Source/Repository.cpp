@@ -34,7 +34,7 @@ bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directo
 		{
 			std::cout << "Exporting: " + RepoURL + Directory << std::endl;
 
-			FString ExportCommand = "svn export > nul";
+			FString ExportCommand = "svn export --force > nul";
 			ExportCommand
 				.append(" ")
 				.append
