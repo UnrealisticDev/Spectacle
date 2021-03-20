@@ -40,7 +40,7 @@ void FParser::ToJSON(const FString& OutFilepath)
 		using FJson = nlohmann::json;
 		FJson Output;
 		{
-			Output["items"] = {};
+			Output["specifiers"] = {};
 
 			FJson Specifier;
 			for (const std::pair<FUnrealSpecifier, int32>& SpecifierCount : SpecifierCountMap)
@@ -52,7 +52,7 @@ void FParser::ToJSON(const FString& OutFilepath)
 					Specifier["meta"] = SpecifierCount.first.bMetadata;
 					Specifier["count"] = SpecifierCount.second;
 				}
-				Output["items"] += Specifier;
+				Output["specifiers"] += Specifier;
 			}
 		}
 		OutFile << Output.dump();

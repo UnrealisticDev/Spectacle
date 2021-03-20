@@ -98,14 +98,14 @@ int main(int ArgumentCount, char* Arguments[])
 			.string()
 		);
 	}
-	catch (std::runtime_error e)
-	{
-		std::cerr << "Encountered parsing error: " << e.what() << std::endl;
-		return (uint8)EReturn::ParsingError;
-	}
 	catch (std::ofstream::failure e)
 	{
 		std::cerr << "Encountered output error: " << e.what() << std::endl;
 		return (uint8)EReturn::OutputError;
+	}
+	catch (std::runtime_error e)
+	{
+		std::cerr << "Encountered parsing error: " << e.what() << std::endl;
+		return (uint8)EReturn::ParsingError;
 	}
 }
