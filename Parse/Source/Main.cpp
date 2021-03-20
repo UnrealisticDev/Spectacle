@@ -15,6 +15,8 @@ enum class EReturn : uint8
 	FileInaccessible	= 1 << 2,
 	FailedtoReadFile	= 1 << 3,
 	LexingError			= 1 << 4,
+	ParsingError		= 1 << 5,
+	OutputError			= 1 << 6
 };
 
 /** 
@@ -99,5 +101,11 @@ int main(int ArgumentCount, char* Arguments[])
 	catch (std::runtime_error e)
 	{
 		std::cerr << "Encountered parsing error: " << e.what() << std::endl;
+		return (uint8)EReturn::ParsingError;
+	}
+	catch (std::ofstream::failure)
+	{
+		std::cerr << "Encountered output error: " << e.what() << std::endl;
+		return (uint8)EReturn::OutputError;
 	}
 }
