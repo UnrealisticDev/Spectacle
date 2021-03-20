@@ -103,7 +103,7 @@ int main(int ArgumentCount, char* Arguments[])
 		std::cerr << "Encountered parsing error: " << e.what() << std::endl;
 		return (uint8)EReturn::ParsingError;
 	}
-	catch (std::ofstream::failure)
+	catch (std::ofstream::failure e)
 	{
 		std::cerr << "Encountered output error: " << e.what() << std::endl;
 		return (uint8)EReturn::OutputError;
