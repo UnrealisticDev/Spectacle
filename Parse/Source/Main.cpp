@@ -10,13 +10,13 @@
 
 enum class EReturn : uint8
 {
-	Success				= 1 << 0,
-	BadFilePath			= 1 << 1,
-	FileInaccessible	= 1 << 2,
-	FailedtoReadFile	= 1 << 3,
-	LexingError			= 1 << 4,
-	ParsingError		= 1 << 5,
-	OutputError			= 1 << 6
+	Success				= 0 << 0,
+	BadFilePath			= 1 << 0,
+	FileInaccessible	= 1 << 1,
+	FailedtoReadFile	= 1 << 2,
+	LexingError			= 1 << 3,
+	ParsingError		= 1 << 4,
+	OutputError			= 1 << 5
 };
 
 /** 
