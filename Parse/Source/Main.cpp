@@ -64,7 +64,7 @@ int main(int ArgumentCount, char* Arguments[])
 	}
 	catch (std::ifstream::failure e)
 	{
-		std::cerr << "Failed to read source file: " << e.what();
+		std::cerr << "Failed to read source file: " << e.what() << std::endl;
 		return (uint8)EReturn::FailedtoReadFile;
 	}
 	
