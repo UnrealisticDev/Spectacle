@@ -108,4 +108,6 @@ int main(int ArgumentCount, char* Arguments[])
 		std::cerr << "Encountered parsing error: " << e.what() << std::endl;
 		return (uint8)EReturn::ParsingError;
 	}
+
+	return (uint8)EReturn::Success;
 }
