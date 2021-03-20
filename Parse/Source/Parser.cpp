@@ -221,7 +221,7 @@ void FParser::IdentifySpecifiersWithinMacro(EUnrealSpecifierType SpecifierType, 
 		FToken Specifier = GetToken();
 		if ( !Specifier.IsValid() )
 		{
-			throw;
+			throw std::runtime_error("Found invalid token.");
 		}
 
 		// Metadata

@@ -80,17 +80,24 @@ int main(int ArgumentCount, char* Arguments[])
 		return (uint8)EReturn::LexingError;
 	}
 
-	FParser Parser;
-	Parser.IdentifyUnrealSpecifiers(Tokens);
-	Parser.ToJSON
-	(
-		FPaths::TempDirectory()
-		.append
+	try 
+	{
+		FParser Parser;
+		Parser.IdentifyUnrealSpecifiers(Tokens);
+		Parser.ToJSON
 		(
-			ArgumentCount > 2 && std::filesystem::path(Arguments[2]).has_extension()
-			? Arguments[2]
-			: "Parsed.json"
-		)
-		.string()
-	);
+			FPaths::TempDirectory()
+			.append
+			(
+				ArgumentCount > 2 && std::filesystem::path(Arguments[2]).has_extension()
+				? Arguments[2]
+				: "Parsed.json"
+			)
+			.string()
+		);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cerr << "Encountered parsing error: " << e.what() << std::endl;
+	}
 }
