@@ -14,6 +14,7 @@ enum class EReturn : uint8
 	BadFilePath			= 1 << 1,
 	FileInaccessible	= 1 << 2,
 	FailedtoReadFile	= 1 << 3,
+	LexingError			= 1 << 4,
 };
 
 /** 
@@ -66,9 +67,18 @@ int main(int ArgumentCount, char* Arguments[])
 		std::cerr << "Failed to read source file: " << e.what();
 		return (uint8)EReturn::FailedtoReadFile;
 	}
-
-	FLexer Lexer;
-	TArray<FToken> Tokens = Lexer.Tokenize(SourceContent.c_str());
+	
+	TArray<FToken> Tokens;
+	try
+	{
+		FLexer Lexer;
+		Tokens = Lexer.Tokenize(SourceContent.c_str());
+	}
+	catch (std::runtime_error e)
+	{
+		std::cerr << "Encountered lexing error: " << e.what() << std::endl;
+		return (uint8)EReturn::LexingError;
+	}
 
 	FParser Parser;
 	Parser.IdentifyUnrealSpecifiers(Tokens);
