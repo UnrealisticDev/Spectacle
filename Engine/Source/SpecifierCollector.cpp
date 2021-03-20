@@ -63,7 +63,7 @@ void FSpecifierCollector::ParseSpecifiers()
 			}
 
 			FJson Result;
-			for (const FJson& ParsedSpecifier : ParsedSpecifiers["items"])
+			for (const FJson& ParsedSpecifier : ParsedSpecifiers["specifiers"])
 			{
 				ValidateParsedSpecifier(ParsedSpecifier);
 				ConvertParsedSpecifierToResult(ParsedSpecifier, RelativeSourcePath, Result);
