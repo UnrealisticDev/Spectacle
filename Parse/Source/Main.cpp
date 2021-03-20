@@ -12,7 +12,8 @@ enum class EReturn : uint8
 {
 	Success				= 1 << 0,
 	BadFilePath			= 1 << 1,
-	FileInaccessible	= 1 << 2
+	FileInaccessible	= 1 << 2,
+	FailedtoReadFile	= 1 << 3,
 };
 
 /** 
@@ -51,11 +52,19 @@ int main(int ArgumentCount, char* Arguments[])
 	}
 
 	FString SourceContent;
-	std::ifstream SourceFile(SourcePath);
-	FString Line;
-	while (std::getline(SourceFile, Line))
+	try
 	{
-		SourceContent += Line + "\n\r"; // Normalize line endings
+		std::ifstream SourceFile(SourcePath);
+		FString Line;
+		while (std::getline(SourceFile, Line))
+		{
+			SourceContent += Line + "\n\r"; // Normalize line endings
+		}
+	}
+	catch (std::ifstream::failure e)
+	{
+		std::cerr << "Failed to read source file: " << e.what();
+		return (uint8)EReturn::FailedtoReadFile;
 	}
 
 	FLexer Lexer;
