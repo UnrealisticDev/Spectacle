@@ -1,11 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <bitset>
 #include <stdexcept>
 #include "CoreTypes.h"
 #include "CorePath.h"
 #include "Lexer.h"
 #include "Parser.h"
+
+enum class EReturn : uint8
+{
+	Success				= 1 << 0,
+	BadFilePath			= 1 << 1,
+	FileInaccessible	= 1 << 2
+};
 
 /** 
  * This tool parses an Unreal Engine 4 header file 
@@ -19,26 +27,35 @@
 int main(int ArgumentCount, char* Arguments[])
 {
 	FString SourcePath = ArgumentCount > 1 ? Arguments[1] : "";
-	if ( !std::filesystem::exists(SourcePath) )
+	if (SourcePath.empty() || !std::filesystem::exists(SourcePath) || !std::filesystem::is_regular_file(SourcePath))
 	{
-		throw std::invalid_argument(FString("Source file not found: ") + SourcePath + ". Nothing to parse.");
+		std::cerr
+			<< "Source file not found: ["
+			<< SourcePath << "]. "
+			<< "Nothing to parse."
+			<< std::endl;
+
+		return (uint8)EReturn::BadFilePath;
+	}
+
+	namespace fs = std::filesystem;
+	fs::perms Permissions = fs::status(SourcePath).permissions() & fs::perms::owner_read;
+	if (Permissions == fs::perms::none)
+	{
+		std::cerr
+			<< "Source file inaccessible: ["
+			<< SourcePath << "]. "
+			<< std::endl;
+
+		return (uint8)EReturn::FileInaccessible;
 	}
 
 	FString SourceContent;
 	std::ifstream SourceFile(SourcePath);
-	if ( SourceFile.is_open() )
+	FString Line;
+	while (std::getline(SourceFile, Line))
 	{
-		FString Line;
-		while ( !SourceFile.eof() )
-		{
-			std::getline(SourceFile, Line);
-			SourceContent += Line + "\n\r"; // Normalize line endings
-		}
-	}
-
-	else
-	{
-		throw std::runtime_error("Unable to open source file.");
+		SourceContent += Line + "\n\r"; // Normalize line endings
 	}
 
 	FLexer Lexer;
@@ -51,14 +68,14 @@ int main(int ArgumentCount, char* Arguments[])
 		FPaths::TempDirectory()
 		.append
 		(
-			ArgumentCount > 2 && std::filesystem::path(Arguments[2]).has_extension() 
-			? Arguments[2] 
+			ArgumentCount > 2 && std::filesystem::path(Arguments[2]).has_extension()
+			? Arguments[2]
 			: "Parsed.json"
 		)
 		.string()
 	);
 
-	if ( ArgumentCount > 3 && Arguments[3] == "-debug" )
+	if (ArgumentCount > 3 && Arguments[3] == "-debug")
 	{
 		Parser.Dump(false);
 	}
