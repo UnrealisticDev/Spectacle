@@ -93,9 +93,4 @@ int main(int ArgumentCount, char* Arguments[])
 		)
 		.string()
 	);
-
-	if (ArgumentCount > 3 && Arguments[3] == "-debug")
-	{
-		Parser.Dump(false);
-	}
 }
