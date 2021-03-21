@@ -137,9 +137,8 @@ int main(int ArgumentCount, char* Arguments[])
 		ParseVersion(Version);
 
 		ParsedVersions.push_back(Version);
+		SaveParsedVersions(ParsedVersions);
 	}
-
-	SaveParsedVersions(ParsedVersions);
 
 	std::cout << "Shifting to monitoring mode." << std::endl;
 	
