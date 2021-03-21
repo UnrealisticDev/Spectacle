@@ -12,6 +12,17 @@ enum class EReturn : uint8
 	Fail			= 1	<< 0
 };
 
+/** 
+ * The Engine puts various pieces of the Spectacle project
+ * together to create a comprehensive UE4 parser.
+ * It clones the Unreal Engine source code from GitHub
+ * at the specified branch, parses relevant source files for USpecifiers,
+ * outputs that information to result files on a per-specifier basis,
+ * and uploads those results to the server of your choosing
+ * (in this case Contentful) for further processing.
+ * 
+ * @param 1: Branch: Should be in the form "4.*" (e.g. 4.23). If not specified, defaults to master.
+ */
 int main(int ArgumentCount, char* Arguments[])
 {
 	EReturn ExitCode = EReturn::Success;
