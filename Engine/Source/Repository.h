@@ -21,5 +21,5 @@ struct FRepository
 	 * @param Directories	The directories to clone. If not specified, defaults to root (full clone).
 	 * @see https://stackoverflow.com/questions/7106012/download-a-single-folder-or-directory-from-a-github-repo
 	 */
-	static bool Clone(const FString& RepoURL, const FString& Branch, const TArray<FString>& Directories);
+	static void Clone(const FString& RepoURL, const FString& Branch, const TArray<FString>& Directories);
 };

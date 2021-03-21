@@ -5,7 +5,7 @@
 #include "CoreTypes.h"
 #include "CorePath.h"
 
-bool FRepository::Clone(const FString& RepoURL, const FString& Branch, const TArray<FString>& Directories)
+void FRepository::Clone(const FString& RepoURL, const FString& Branch, const TArray<FString>& Directories)
 {
 	std::filesystem::path Destination = FPaths::SourceDirectory();
 	FString Repo = RepoURL;
@@ -64,6 +64,4 @@ bool FRepository::Clone(const FString& RepoURL, const FString& Branch, const TAr
 
 		std::system(ExportCommand.c_str());
 	}
-
-	return true;
 }
