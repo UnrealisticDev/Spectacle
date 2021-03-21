@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <stdexcept>
 #include "Repository.h"
 #include "SpecifierCollector.h"
 #include "CoreTypes.h"
@@ -18,7 +19,20 @@ int main(int ArgumentCount, char* Arguments[])
 
 	FPaths::CreateTempDirectory();
 
-	FRepository::Clone(RepoURL, Branch, Directories);
+	try
+	{
+		FRepository::Clone(RepoURL, Branch, Directories);
+	}
+	catch (std::invalid_argument e)
+	{
+		std::cerr << "Failed to clone repository: " << e.what() << std::endl;
+		return -1;
+	}
+	catch (std::runtime_error e)
+	{
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
 
 	FSpecifierCollector SpecifierCollector;
 	{

@@ -8,7 +8,12 @@
 void FRepository::Clone(const FString& RepoURL, const FString& Branch, const TArray<FString>& Directories)
 {
 	std::filesystem::path Destination = FPaths::SourceDirectory();
+	
 	FString Repo = RepoURL;
+	if ( Repo.empty() )
+	{
+		throw std::invalid_argument("No repo URL provided.");
+	}
 
 	if ( !Branch.empty() )
 	{
@@ -26,7 +31,7 @@ void FRepository::Clone(const FString& RepoURL, const FString& Branch, const TAr
 	bool bRepoNotFound = std::system(("svn ls > nul " + Repo).c_str());
 	if ( bRepoNotFound )
 	{
-		throw std::invalid_argument("Repository does not exist: " + Repo);
+		throw std::invalid_argument("Repository was not found: " + Repo);
 	}
 
 	if ( Directories.size() > 0 )
@@ -49,7 +54,11 @@ void FRepository::Clone(const FString& RepoURL, const FString& Branch, const TAr
 					.append(Directory)
 				);
 
-			std::system(ExportCommand.c_str());
+			bool bExportFail = std::system(ExportCommand.c_str());
+			if ( bExportFail )
+			{
+				throw std::runtime_error("Encountered export error.");
+			}
 		}
 	}
 
@@ -62,6 +71,10 @@ void FRepository::Clone(const FString& RepoURL, const FString& Branch, const TAr
 			.append(" ")
 			.append(Destination.string());
 
-		std::system(ExportCommand.c_str());
+		bool bExportFail = std::system(ExportCommand.c_str());
+		if ( bExportFail )
+		{
+			throw std::runtime_error("Encountered export error.");
+		}
 	}
 }
