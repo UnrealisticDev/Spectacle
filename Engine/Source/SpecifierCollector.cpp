@@ -15,8 +15,7 @@ void FSpecifierCollector::ParseSpecifiers()
 
 	if ( !fs::exists(SourceDirectory) || !fs::is_directory(SourceDirectory) )
 	{
-		std::cerr << "Source directory" << SourceDirectory << "does not exist.";
-		return;
+		throw std::invalid_argument("Source directory" + SourceDirectory.string() + "does not exist.");
 	}
 
 	if ( !fs::exists(ResultsDirectory) || !fs::is_directory(ResultsDirectory) )
@@ -32,33 +31,33 @@ void FSpecifierCollector::ParseSpecifiers()
 		{
 			const fs::path RelativeSourcePath = SourcePath.path().lexically_relative(SourceDirectory);
 
-			try
-			{
-				FString ParseCommand = "Parse";
-				ParseCommand
-					.append(" ")
-					.append(SourcePath.path().string())
-					.append(" ")
-					.append(ParsedOutputFilename);
+			FString ParseCommand = "Parse";
+			ParseCommand
+				.append(" ")
+				.append(SourcePath.path().string())
+				.append(" ")
+				.append(ParsedOutputFilename);
 
-				std::system(ParseCommand.c_str());
-			}
-
-			catch (...) 
+			bool bParseFail = std::system(ParseCommand.c_str());
+			if ( bParseFail )
 			{
-				std::cout << "--> Something went wrong in parsing source: " << RelativeSourcePath.string() << std::endl;
+				std::cerr << "Failed to parse source file: " << RelativeSourcePath.string() << std::endl;
 				continue;
 			}
-
+			
 			FJson ParsedSpecifiers;
 			try
 			{
 				ParsedSpecifiers = FJson::parse(std::ifstream(ParsedOutputPath));
 			}
 			
-			catch (...)
+			catch (FJsonParseError e)
 			{
-				std::cout << "--> Something went wrong in parsing output: " << RelativeSourcePath.string() << std::endl;
+				std::cerr << "Failed to deserialize results for source file: "
+					<< RelativeSourcePath.string()
+					<< " : " << e.what()
+					<< std::endl;
+
 				continue;
 			}
 
@@ -84,12 +83,13 @@ void FSpecifierCollector::ValidateParsedSpecifier(const FJson& ParsedSpecifier)
 
 void FSpecifierCollector::ConvertParsedSpecifierToResult(const FJson& ParsedSpecifier, const std::filesystem::path& RelativeSourcePath, FJson& Result)
 {
+	Result.clear();
+
+	namespace fs = std::filesystem;
+	fs::path ResultFilePath = FPaths::ResultsDirectory().append(GetResultFilename(ParsedSpecifier["type"], ParsedSpecifier["key"]));
+
 	try
 	{
-		Result.clear();
-
-		namespace fs = std::filesystem;
-		fs::path ResultFilePath = FPaths::ResultsDirectory().append(GetResultFilename(ParsedSpecifier["type"], ParsedSpecifier["key"]));
 		if ( fs::exists(ResultFilePath) )
 		{
 			Result = FJson::parse(std::ifstream(ResultFilePath));
@@ -115,9 +115,9 @@ void FSpecifierCollector::ConvertParsedSpecifierToResult(const FJson& ParsedSpec
 		}
 	}
 
-	catch (...)
+	catch (FJsonParseError e)
 	{
-		std::cout << "--> Something went wrong while converting parsed specifiers to results." << std::endl;
+		std::cerr << "Parsing error when reading result file: " << ResultFilePath << std::endl;
 	}
 }
 
@@ -162,7 +162,21 @@ void FSpecifierCollector::TrimResults(int Size)
 			continue;
 		}
 
-		FJson Result = FJson::parse(std::ifstream(ResultPath));
+		FJson Result;
+		try
+		{
+			Result = FJson::parse(std::ifstream(ResultPath));
+		}
+		catch (FJsonParseError e)
+		{
+			std::cerr << "Parse error when reading file for trimming: " 
+				<< ResultPath.path() 
+				<< " : " << e.what() 
+				<< std::endl;
+
+			continue;
+		}
+
 		TrimResult(Result, Size);
 		SaveResult(Result);
 	}

@@ -23,6 +23,7 @@ public:
 private:
 
 	using FJson = nlohmann::json;
+	using FJsonParseError = nlohmann::detail::parse_error;
 
 private:
 
