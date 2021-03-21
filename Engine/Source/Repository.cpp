@@ -5,13 +5,14 @@
 #include "CoreTypes.h"
 #include "CorePath.h"
 
-bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directories)
+bool FRepository::Clone(const FString& RepoURL, const FString& Branch, const TArray<FString>& Directories)
 {
 	std::filesystem::path Destination = FPaths::SourceDirectory();
+	FString Repo = RepoURL;
 
 	if ( !Branch.empty() )
 	{
-		RepoURL
+		Repo
 			.append("/branches/")
 			.append(Branch)
 			.append("/");
@@ -19,27 +20,27 @@ bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directo
 
 	else
 	{
-		RepoURL.append("/trunk/"); // In SVN, refers to main branch
+		Repo.append("/trunk/"); // In SVN, refers to main branch
 	}
 
-	bool bRepoNotFound = std::system(("svn ls > nul " + RepoURL).c_str());
+	bool bRepoNotFound = std::system(("svn ls > nul " + Repo).c_str());
 	if ( bRepoNotFound )
 	{
-		throw std::invalid_argument("Repository does not exist: " + RepoURL);
+		throw std::invalid_argument("Repository does not exist: " + Repo);
 	}
 
 	if ( Directories.size() > 0 )
 	{
 		for (const FString& Directory : Directories)
 		{
-			std::cout << "Exporting: " + RepoURL + Directory << std::endl;
+			std::cout << "Exporting: " + Repo + Directory << std::endl;
 
 			FString ExportCommand = "svn export --force > nul";
 			ExportCommand
 				.append(" ")
 				.append
 				(
-					RepoURL + Directory
+					Repo + Directory
 				)
 				.append(" ")
 				.append
@@ -57,7 +58,7 @@ bool FRepository::Clone(FString RepoURL, FString Branch, TArray<FString> Directo
 		FString ExportCommand = "svn export";
 		ExportCommand
 			.append(" ")
-			.append(RepoURL)
+			.append(Repo)
 			.append(" ")
 			.append(Destination.string());
 

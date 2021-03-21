@@ -7,9 +7,9 @@
 
 int main(int ArgumentCount, char* Arguments[])
 {
-	FString RepoURL = "https://github.com/EpicGames/UnrealEngine";
-	FString Branch = ArgumentCount > 1 ? Arguments[1] : "";
-	TArray<FString> Directories = 
+	const FString RepoURL = "https://github.com/EpicGames/UnrealEngine";
+	const FString Branch = ArgumentCount > 1 ? Arguments[1] : "";
+	const TArray<FString> Directories = 
 	{
 		"Engine/Source/Runtime",
 		"Engine/Source/Editor",
