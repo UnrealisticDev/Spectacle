@@ -15,7 +15,7 @@ It is this problem that Spectacle was designed to solve. Its primary goal is to 
 The Spectacle search tool offers the following features:
 
 * A *complete* dataset of every `USpecifier` used in the Engine source code to date (*)
-* Text search with the ability to presents results for all `USpecifier` types simultaneously, including
+* Text search with the ability to presents results for all `USpecifier` types simultaneously, including:
   * Class
   * Struct
   * Property
