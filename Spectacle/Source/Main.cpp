@@ -98,7 +98,7 @@ void SaveParsedVersions(const TArray<FJson>& ParsedVersions)
  */
 int main(int ArgumentCount, char* Arguments[])
 {
-	if (ArgumentCount > 1 && Arguments[1] == "hidden")
+	if (ArgumentCount > 1 && strcmp(Arguments[1], "hidden") == 0)
 	{
 		std::ofstream out("Log.txt");
 		std::streambuf* coutbuf = std::cout.rdbuf();
