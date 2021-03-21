@@ -15,27 +15,20 @@ const uint8 MAX_VERSION = 99; // Because we'll all be dead by the time UE 4.100 
 const FString HistoryFilePath = "history.json";
 
 using FJson = nlohmann::json;
+using FJsonParseError = nlohmann::detail::parse_error;
 
 TArray<FJson> LoadParsedVersions()
 {
 	TArray<FJson> ParsedVersions;
 
-	try
+	std::ifstream HistoryFile(HistoryFilePath);
+	if (HistoryFile.is_open())
 	{
-		std::ifstream HistoryFile(HistoryFilePath);
-		if (HistoryFile.is_open())
+		FJson History = FJson::parse(HistoryFile);
+		if (!History.is_null() && History.contains("parsedVersions") && History["parsedVersions"].is_array())
 		{
-			FJson History = FJson::parse(HistoryFile);
-			if (!History.is_null() && History.contains("parsedVersions") && History["parsedVersions"].is_array())
-			{
-				ParsedVersions = History["parsedVersions"].get<TArray<FJson>>();
-			}
+			ParsedVersions = History["parsedVersions"].get<TArray<FJson>>();
 		}
-	}
-
-	catch (...)
-	{
-		std::cout << "History load error.";
 	}
 
 	return ParsedVersions;
@@ -106,9 +99,24 @@ int main(int ArgumentCount, char* Arguments[])
 		::ShowWindow(::GetConsoleWindow(), SW_HIDE); // Hide console and redirect output to file
 	}
 
-	TArray<FJson> ParsedVersions = LoadParsedVersions();
-	uint8 LatestUnparsedVersion = 0;
+	TArray<FJson> ParsedVersions;
+	try
+	{
+		ParsedVersions = LoadParsedVersions();
+	}
+	catch (std::ifstream::failure e)
+	{
+		std::cerr << "Encountered error in opening history file: " << e.what() << std::endl;
+		return -1;
+	}
+	catch (FJsonParseError e)
+	{
+		std::cerr << "Encountered error in parsing history file: " << e.what() << std::endl;
+		return -1;
+	}
 	std::cout << "Loaded parsed versions." << std::endl;
+
+	uint8 LatestUnparsedVersion = 0;
 
 	for (uint8 Version = MIN_VERSION; Version < MAX_VERSION; ++Version)
 	{
