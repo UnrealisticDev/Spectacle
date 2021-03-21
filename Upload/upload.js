@@ -4,6 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const contentful = require('contentful-management');
 
+const ERR = Object.freeze({
+	argument: 1,
+	fetch: 2,
+	parse: 3,
+	other: 4,
+});
+
 env.config();
 const {
 	CONTENTFUL_MANAGEMENT_API_KEY,
@@ -30,11 +37,11 @@ const fetchExistingSpecifiers = async (client) => {
 		const environment = await space.getEnvironment(CONTENTFUL_ENVIRONMENT);
 		const specifiers = await environment.getEntries({
 			content_type: CONTENTFUL_TYPE,
-			limit: 1000
+			limit: 1000,
 		});
 		return specifiers;
 	} catch (error) {
-		console.error('Failed to fetch existing specifiers: ' + error);
+		console.error(`Failed to fetch existing specifiers: ${error}`);
 	}
 };
 
@@ -45,7 +52,8 @@ const loadParsedResult = async (file) => {
 	try {
 		return JSON.parse(await fs.promises.readFile(file));
 	} catch (error) {
-		return console.log('Failed to open or parse result file: ' + error);
+		console.error(`Failed to open or parse result file: ${file}: ${error}`);
+		process.exitCode = ERR.parse;
 	}
 };
 
@@ -95,7 +103,11 @@ const calculateSpecifierDelta = (
 
 	if (existingSpecifier) {
 		const { occ } = existingSpecifier.fields;
-		if (!occ['en-US'].versions.some(({ version: exVersion }) => exVersion === version)) {
+		if (
+			!occ['en-US'].versions.some(
+				({ version: exVersion }) => exVersion === version
+			)
+		) {
 			var updatedSpecifier = existingSpecifier;
 			updatedSpecifier.fields.occ['en-US'].versions.push(
 				parsedSpecifier.fields.occ['en-US'].versions[0]
@@ -149,6 +161,7 @@ const pushEntryDeltas = async (client, deltas) => {
 		const existingSpecifiers = await fetchExistingSpecifiers(client);
 		if (!existingSpecifiers) {
 			console.error('No existing entries retrieved.');
+			process.exitCode = ERR.fetch;
 			return;
 		} else {
 			console.log(
@@ -167,6 +180,7 @@ const pushEntryDeltas = async (client, deltas) => {
 		const results = await fs.promises.readdir(parsedResultDirectory);
 		if (results.length === 0) {
 			console.error('No results to parse in result directory.');
+			process.exitCode = Err.argument;
 			return;
 		} else {
 			console.log('Found %d parsed results.', results.length);
@@ -214,5 +228,6 @@ const pushEntryDeltas = async (client, deltas) => {
 		console.log('Upload successful.');
 	} catch (error) {
 		console.error(error);
+		process.exitCode = ERR.other;
 	}
 })();
