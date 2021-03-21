@@ -203,7 +203,7 @@ void FSpecifierCollector::TrimResult(FJson& Result, int Size)
 
 void FSpecifierCollector::Upload(FString Branch)
 {
-	if (Branch.rfind("4.", 0) == 0)
+	if ( Branch.rfind("4.", 0) == 0 )
 	{
 		int32 DelimPos = (int32)Branch.find('.');
 		Branch = Branch.substr
@@ -220,5 +220,9 @@ void FSpecifierCollector::Upload(FString Branch)
 		.append(" ")
 		.append(Branch);
 
-	std::system(UploadCommand.c_str());
+	bool bUploadFail = std::system(UploadCommand.c_str());
+	if ( bUploadFail )
+	{
+		std::cerr << "Upload failed.";
+	}
 }
