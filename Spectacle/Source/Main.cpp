@@ -88,6 +88,14 @@ void SaveParsedVersions(const TArray<FJson>& ParsedVersions)
 	}
 }
 
+/** 
+ * This is a heartbeat process 
+ * designed to iterate over each version of Unreal Engine 4
+ * and put it through the parsing engine. Once all existing
+ * versions are parsed, the process goes into monitoring
+ * mode and periodically checks for new versions.
+ * If a new version is available, it will parse it.
+ */
 int main(int ArgumentCount, char* Arguments[])
 {
 	if (ArgumentCount > 1 && Arguments[1] == "hidden")
