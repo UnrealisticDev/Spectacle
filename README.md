@@ -32,7 +32,7 @@ The Spectacle search tool offers the following features:
 
 In the spirit of community (and for the sake of my Saturdays), the analysis for each `USpecifier` has been made [publicly editable](https://github.com/UnrealisticDev/Unrealistic/tree/spectacle/src/content/uspecifiers). With sufficient participation, this will make the analysis generally more comprehensive and useful for all.
 
-> (\*) The dataset currently covers the most relevant Engine source directories, namely *Runtime*, *Editor*, and *Developer*.It does not cover the *ThirdParty* and *Program* directories, which generally did not contain `USpecifiers` based on my review. Nor does it cover the *Plugins* directory, though this may change depending on interest.
+> (\*) The dataset currently covers the most relevant Engine source directories, namely *Runtime*, *Editor*, and *Developer*. It does not cover the *ThirdParty* and *Program* directories, which generally did not contain `USpecifiers` based on my review. Nor does it cover the *Plugins* directory, though this may change depending on interest.
 
 ## Technical Elements
 
