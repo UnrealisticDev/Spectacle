@@ -1,8 +1,8 @@
-![Spectacle Landing Page](https://i.imgur.com/aEh73Kc.png)
-
 # Spectacle
 
 Spectacle is the first _global_ search for Unreal Engine 4 specifiers. The search is live at [Unrealistic](https://unrealistic.dev/spectacle).
+
+<iframe src="https://giphy.com/embed/kbLFfnO7SpALgKIC6H" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/kbLFfnO7SpALgKIC6H">via GIPHY</a></p>
 
 ## Motivation
 
