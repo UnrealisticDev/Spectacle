@@ -36,7 +36,7 @@ In the spirit of community (and for the sake of my Saturdays), the analysis for 
 
 ## Technical Elements
 
-From a technical perspective, this project was implemented primarily in C++ with a brief venture into JavaScript via Node.js for the upload component. Among other things, it involves the use of:
+From a technical perspective, this project was implemented primarily in C++ with a brief venture into JavaScript via Node.js for the upload component. Among other things, it employs:
 
 * The standard template library for strings, vectors, filesystem access, and exceptions
 * A special-purpose C++ lexer and parser to identify `USpecifiers` from raw source code
